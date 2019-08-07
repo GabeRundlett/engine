@@ -1,0 +1,9 @@
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+AccessModifierOffset: -2
+SortUsingDeclarations: false
+AllowShortCaseLabelsOnASingleLine: true
+NamespaceIndentation: Inner
+CompactNamespaces: true
+ColumnLimit: 128

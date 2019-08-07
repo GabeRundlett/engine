@@ -1,0 +1,13 @@
+Makefile
+/bin*
+/.vscode
+/.vs
+*.sln
+*.vcxproj
+*.user
+*.filters
+*.vcxproj
+/build/bin
+
+*.exe
+*.o

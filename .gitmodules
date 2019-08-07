@@ -1,0 +1,6 @@
+[submodule "glfw"]
+	path = glfw
+	url = https://github.com/GabeRundlett/glfw
+[submodule "glad"]
+	path = glad
+	url = https://github.com/GabeRundlett/glad
