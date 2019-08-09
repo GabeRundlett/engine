@@ -262,23 +262,27 @@ namespace coel { namespace renderer { namespace _internal {
         static bool s_vao_needs_init = true;
         static unsigned int s_vao_id, s_vbo_count = 0, s_vbo_size = 0;
         namespace vbo {
-            VBO create(const float *data, const unsigned int vertex_size, const unsigned short count) {
-                if (s_vao_needs_init) {
-                    s_vao_needs_init = false;
-                    glGenVertexArrays(1, &s_vao_id);
-                    glBindVertexArray(s_vao_id);
+            VBO create(const float *data, const unsigned int vertex_dim, const unsigned short count) {
+                if (s_vbo_count < 32) {
+                    if (s_vao_needs_init) {
+                        s_vao_needs_init = false;
+                        glGenVertexArrays(1, &s_vao_id);
+                        glBindVertexArray(s_vao_id);
+                    }
+                    VBO result;
+                    result.dim = vertex_dim;
+                    result.size = vertex_dim * count * sizeof(float);
+                    glGenBuffers(1, &result.id);
+                    glBindBuffer(GL_ARRAY_BUFFER, result.id);
+                    glBufferData(GL_ARRAY_BUFFER, result.size, data, GL_STATIC_DRAW);
+                    glEnableVertexAttribArray(s_vbo_count);
+                    glVertexAttribPointer(s_vbo_count, vertex_dim, GL_FLOAT, GL_FALSE, vertex_dim * sizeof(float),
+                                          (const void *)0);
+                    s_vbo_size += result.size;
+                    ++s_vbo_count;
+                    return result;
                 }
-                VBO result;
-                result.size = vertex_size * count;
-                glGenBuffers(1, &result.id);
-                glBindBuffer(GL_ARRAY_BUFFER, result.id);
-                glBufferData(GL_ARRAY_BUFFER, result.size, data, GL_STATIC_DRAW);
-
-                glEnableVertexAttribArray(s_vbo_count);
-                glVertexAttribPointer(s_vbo_count, count, GL_FLOAT, GL_FALSE, vertex_size, (const void *)0);
-                s_vbo_size += result.size;
-                ++s_vbo_count;
-                return result;
+                return {0, vertex_dim * count * sizeof(float), vertex_dim};
             }
         } // namespace vbo
 
@@ -367,7 +371,9 @@ namespace coel { namespace renderer { namespace _internal {
                 return result;
             }
             void bind(const Shader *shader) { glUseProgram(shader->id); }
-            void send_int(const Shader *shader, const char *uniform_name, const int data) {}
+            void send_int(const Shader *shader, const char *uniform_name, const int data) {
+                glUniform1i(glGetUniformLocation(shader->id, uniform_name), data);
+            }
             void send_float(const Shader *shader, const char *uniform_name, const float data) {
                 glUniform1f(glGetUniformLocation(shader->id, uniform_name), data);
             }

@@ -73,6 +73,8 @@ namespace coel { namespace window { namespace _internal {
             bool direct3d(const Window *window);
             bool opengl(const Window *window);
         } // namespace update
+        void set_cursor_pos(const Window *window, const float x, const float y);
+        void set_cursor_visibility(const Window *window, const bool value);
         double get_time();
     } // namespace agnostic
 
@@ -114,6 +116,8 @@ namespace coel { namespace window { namespace _internal {
             bool direct3d(const Window *window);
             bool opengl(const Window *window);
         } // namespace update
+        void set_cursor_pos(const Window *window, const float x, const float y);
+        void set_cursor_visibility(const Window *window, const bool value);
         double get_time();
     } // namespace glfw
 
@@ -155,6 +159,8 @@ namespace coel { namespace window { namespace _internal {
             bool direct3d(const Window *window);
             bool opengl(const Window *window);
         } // namespace update
+        void set_cursor_pos(const Window *window, const float x, const float y);
+        void set_cursor_visibility(const Window *window, const bool value);
         double get_time();
     } // namespace win32
 }}}   // namespace coel::window::_internal
@@ -381,6 +387,38 @@ namespace coel { namespace window {
             default: return false;
             }
         default: return false;
+        }
+    }
+
+    //
+    //
+    //
+    //
+    //
+
+    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
+    void set_cursor_pos(const Window *window, const float x, const float y) {
+        switch (W) {
+        case WindowAPI::Agnostic: _internal::agnostic::set_cursor_pos(window, x, y); return;
+        case WindowAPI::Win32: _internal::win32::set_cursor_pos(window, x, y); return;
+        case WindowAPI::GLFW: _internal::glfw::set_cursor_pos(window, x, y); return;
+        default: return;
+        }
+    }
+
+    //
+    //
+    //
+    //
+    //
+
+    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
+    void set_cursor_visibility(const Window *window, const bool value) {
+        switch (W) {
+        case WindowAPI::Agnostic: _internal::agnostic::set_cursor_visibility(window, value); return;
+        case WindowAPI::Win32: _internal::win32::set_cursor_visibility(window, value); return;
+        case WindowAPI::GLFW: _internal::glfw::set_cursor_visibility(window, value); return;
+        default: return;
         }
     }
 

@@ -74,6 +74,22 @@ namespace coel { namespace window { namespace _internal {
         //
         //
 
+        void set_cursor_pos(const Window *window, const float x, const float y) {}
+
+        //
+        //
+        //
+        //
+        //
+
+        void set_cursor_visibility(const Window *window, const bool value) {}
+
+        //
+        //
+        //
+        //
+        //
+
         double get_time() { return 0.0; }
     } // namespace agnostic
 
@@ -226,6 +242,26 @@ namespace coel { namespace window { namespace _internal {
         //
         //
 
+        void set_cursor_pos(const Window *window, const float x, const float y) {
+            glfwSetCursorPos(reinterpret_cast<GLFWwindow *>(window->handle), x, y);
+        }
+
+        //
+        //
+        //
+        //
+        //
+
+        void set_cursor_visibility(const Window *window, const bool value) {
+            glfwSetInputMode(reinterpret_cast<GLFWwindow *>(window->handle), GLFW_CURSOR, GLFW_CURSOR_HIDDEN - value);
+        }
+
+        //
+        //
+        //
+        //
+        //
+
         double get_time() { return glfwGetTime(); }
     } // namespace glfw
 
@@ -299,6 +335,22 @@ namespace coel { namespace window { namespace _internal {
             bool direct3d(const Window *window) { return false; }
             bool opengl(const Window *window) { return false; }
         } // namespace update
+
+        //
+        //
+        //
+        //
+        //
+
+        void set_cursor_pos(const Window *window, const float x, const float y) {}
+
+        //
+        //
+        //
+        //
+        //
+
+        void set_cursor_visibility(const Window *window, const bool value) {}
 
         //
         //
