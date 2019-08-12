@@ -53,6 +53,20 @@ namespace coel { namespace renderer { namespace _internal {
         //
         //
 
+        namespace batch {
+            void init() {}
+            void begin(Shader *const shader) {}
+            void submit(const float pos[2], const float size[2]) {}
+            void submit(const float x, const float y, const float w, const float h) {}
+            void end() {}
+        } // namespace batch
+
+        //
+        //
+        //
+        //
+        //
+
         void clear(const unsigned int value) {}
 
         //
@@ -132,6 +146,20 @@ namespace coel { namespace renderer { namespace _internal {
         //
         //
 
+        namespace batch {
+            void init() {}
+            void begin(Shader *const shader) {}
+            void submit(const float pos[2], const float size[2]) {}
+            void submit(const float x, const float y, const float w, const float h) {}
+            void end() {}
+        } // namespace batch
+
+        //
+        //
+        //
+        //
+        //
+
         void clear(const unsigned int value) {}
 
         //
@@ -204,6 +232,20 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data) {}
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data) {}
         } // namespace shader
+
+        //
+        //
+        //
+        //
+        //
+
+        namespace batch {
+            void init() {}
+            void begin(Shader *const shader) {}
+            void submit(const float pos[2], const float size[2]) {}
+            void submit(const float x, const float y, const float w, const float h) {}
+            void end() {}
+        } // namespace batch
 
         //
         //
@@ -393,6 +435,103 @@ namespace coel { namespace renderer { namespace _internal {
                 glUniformMatrix4fv(glGetUniformLocation(shader->id, uniform_name), 1, GL_FALSE, data);
             }
         } // namespace shader
+
+        //
+        //
+        //
+        //
+        //
+
+        namespace batch {
+            // max sprites is 16383 because that is the floored version of 65535 / 4
+            struct VertexData {
+                float x, y, u, v;
+            };
+            static constexpr unsigned int s_max_sprites = 16383, s_vertex_size = sizeof(VertexData),
+                                          s_sprite_size = s_vertex_size * 4, s_max_index = s_max_sprites * 6,
+                                          s_buffer_size = s_sprite_size * s_max_sprites;
+
+            static unsigned int s_vao_id, s_vbo_id, s_ibo_id;
+            static unsigned short s_indices[s_max_index];
+            static unsigned int s_index_count = 0;
+            static VertexData *s_buffer_pointer;
+            static Shader *s_current_shader;
+
+            void init() {
+                // Generate an OpenGL VAO
+                glGenVertexArrays(1, &s_vao_id);
+                glBindVertexArray(s_vao_id);
+                // Generate the OpenGL data buffer (to hold the vertex data)
+                glGenBuffers(1, &s_vbo_id);
+                glBindBuffer(GL_ARRAY_BUFFER, s_vbo_id);
+                glBufferData(GL_ARRAY_BUFFER, s_buffer_size, nullptr, GL_DYNAMIC_DRAW);
+                // Assign the vertex attributes
+                glEnableVertexAttribArray(0);
+                glEnableVertexAttribArray(1);
+                glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, s_vertex_size, reinterpret_cast<const void *>(0));
+                glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, s_vertex_size, reinterpret_cast<const void *>(8));
+                // Fill the index array
+                unsigned int offset = 0;
+                for (unsigned int i = 0; i < s_max_index; i += 6) {
+                    s_indices[i + 0] = offset + 0;
+                    s_indices[i + 1] = offset + 1;
+                    s_indices[i + 2] = offset + 2;
+                    s_indices[i + 3] = offset + 1;
+                    s_indices[i + 4] = offset + 3;
+                    s_indices[i + 5] = offset + 2;
+                    offset += 4;
+                }
+                // Generate the OpenGL index buffer
+                glGenBuffers(1, &s_ibo_id);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_ibo_id);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_max_index * sizeof(unsigned short), s_indices, GL_STATIC_DRAW);
+            }
+            void begin(Shader *const shader) {
+                shader::bind(shader);
+                s_current_shader = shader;
+                glBindBuffer(GL_ARRAY_BUFFER, s_vbo_id);
+                s_buffer_pointer = reinterpret_cast<VertexData *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+            }
+            void submit(const float pos[2], const float size[2]) { submit(pos[0], pos[1], size[0], size[1]); }
+            void submit(const float x, const float y, const float w, const float h) {
+                s_index_count += 6;
+                if (s_index_count > s_max_index) {
+                    end();
+                    begin(s_current_shader);
+                }
+
+                s_buffer_pointer->x = x;
+                s_buffer_pointer->y = y;
+                s_buffer_pointer->u = 0;
+                s_buffer_pointer->v = 0;
+                ++s_buffer_pointer;
+
+                s_buffer_pointer->x = x + w;
+                s_buffer_pointer->y = y;
+                s_buffer_pointer->u = 1;
+                s_buffer_pointer->v = 0;
+                ++s_buffer_pointer;
+
+                s_buffer_pointer->x = x;
+                s_buffer_pointer->y = y + h;
+                s_buffer_pointer->u = 0;
+                s_buffer_pointer->v = 1;
+                ++s_buffer_pointer;
+
+                s_buffer_pointer->x = x + w;
+                s_buffer_pointer->y = y + h;
+                s_buffer_pointer->u = 1;
+                s_buffer_pointer->v = 1;
+                ++s_buffer_pointer;
+            }
+            void end() {
+                glUnmapBuffer(GL_ARRAY_BUFFER);
+
+                glBindVertexArray(s_vao_id);
+                glDrawElements(GL_TRIANGLES, s_index_count, GL_UNSIGNED_SHORT, nullptr);
+                s_index_count = 0;
+            }
+        } // namespace batch
 
         //
         //

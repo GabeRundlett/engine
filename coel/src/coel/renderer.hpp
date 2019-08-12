@@ -1,5 +1,8 @@
 #pragma once
 
+// Add new Renderer APIs
+#define COEL_SET_DEFAULT_RENDERER_API_OPENGL
+
 #ifdef COEL_SET_DEFAULT_RENDERER_API_OPENGL
 #define _COEL_DEFAULT_RENDERER_API OpenGL
 #endif
@@ -63,6 +66,13 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace batch {
+            void init();
+            void begin(Shader *const shader);
+            void submit(const float pos[2], const float size[2]);
+            void submit(const float x, const float y, const float w, const float h);
+            void end();
+        } // namespace batch
         void clear(const unsigned int value);
         void clear(const float r, const float g, const float b, const float a);
         void resize_viewport(const unsigned int width, const unsigned int height);
@@ -93,6 +103,13 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace batch {
+            void init();
+            void begin(Shader *const shader);
+            void submit(const float pos[2], const float size[2]);
+            void submit(const float x, const float y, const float w, const float h);
+            void end();
+        } // namespace batch
         void clear(const unsigned int value);
         void clear(const float r, const float g, const float b, const float a);
         void resize_viewport(const unsigned int width, const unsigned int height);
@@ -123,6 +140,13 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace batch {
+            void init();
+            void begin(Shader *const shader);
+            void submit(const float pos[2], const float size[2]);
+            void submit(const float x, const float y, const float w, const float h);
+            void end();
+        } // namespace batch
         void clear(const unsigned int value);
         void clear(const float r, const float g, const float b, const float a);
         void resize_viewport(const unsigned int width, const unsigned int height);
@@ -153,6 +177,13 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace batch {
+            void init();
+            void begin(Shader *const shader);
+            void submit(const float pos[2], const float size[2]);
+            void submit(const float x, const float y, const float w, const float h);
+            void end();
+        } // namespace batch
         void clear(const unsigned int value);
         void clear(const float r, const float g, const float b, const float a);
         void resize_viewport(const unsigned int width, const unsigned int height);
@@ -303,6 +334,62 @@ namespace coel { namespace renderer {
             }
         }
     } // namespace shader
+
+    //
+    //
+    //
+    //
+    //
+
+    namespace batch {
+        template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API> void init() {
+            switch (R) {
+            case RendererAPI::Agnostic: _internal::agnostic::batch::init(); return;
+            case RendererAPI::Vulkan: _internal::vulkan::batch::init(); return;
+            case RendererAPI::Direct3D: _internal::direct3d::batch::init(); return;
+            case RendererAPI::OpenGL: _internal::opengl::batch::init(); return;
+            default: return;
+            }
+        }
+        template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API> void begin(Shader *const shader) {
+            switch (R) {
+            case RendererAPI::Agnostic: _internal::agnostic::batch::begin(shader); return;
+            case RendererAPI::Vulkan: _internal::vulkan::batch::begin(shader); return;
+            case RendererAPI::Direct3D: _internal::direct3d::batch::begin(shader); return;
+            case RendererAPI::OpenGL: _internal::opengl::batch::begin(shader); return;
+            default: return;
+            }
+        }
+        template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API>
+        void submit(const float pos[2], const float size[2]) {
+            switch (R) {
+            case RendererAPI::Agnostic: _internal::agnostic::batch::submit(pos, size); return;
+            case RendererAPI::Vulkan: _internal::vulkan::batch::submit(pos, size); return;
+            case RendererAPI::Direct3D: _internal::direct3d::batch::submit(pos, size); return;
+            case RendererAPI::OpenGL: _internal::opengl::batch::submit(pos, size); return;
+            default: return;
+            }
+        }
+        template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API>
+        void submit(const float x, const float y, const float w, const float h) {
+            switch (R) {
+            case RendererAPI::Agnostic: _internal::agnostic::batch::submit(x, y, w, h); return;
+            case RendererAPI::Vulkan: _internal::vulkan::batch::submit(x, y, w, h); return;
+            case RendererAPI::Direct3D: _internal::direct3d::batch::submit(x, y, w, h); return;
+            case RendererAPI::OpenGL: _internal::opengl::batch::submit(x, y, w, h); return;
+            default: return;
+            }
+        }
+        template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API> void end() {
+            switch (R) {
+            case RendererAPI::Agnostic: _internal::agnostic::batch::end(); return;
+            case RendererAPI::Vulkan: _internal::vulkan::batch::end(); return;
+            case RendererAPI::Direct3D: _internal::direct3d::batch::end(); return;
+            case RendererAPI::OpenGL: _internal::opengl::batch::end(); return;
+            default: return;
+            }
+        }
+    } // namespace batch
 
     //
     //

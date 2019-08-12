@@ -2,6 +2,9 @@
 #include "event.hpp"
 #include "renderer.hpp"
 
+// Add new Window APIs
+#define COEL_SET_DEFAULT_WINDOW_API_GLFW
+
 #ifdef COEL_SET_DEFAULT_WINDOW_API_GLFW
 #define _COEL_DEFAULT_WINDOW_API GLFW
 #endif
