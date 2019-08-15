@@ -1,14 +1,60 @@
 #include "shader_src.hpp"
 #include <coel.hpp>
 
-#include <cmath>
+static float cam_pos[] = {0, 0};
+static float window_size[] = {640, 640};
+
+void window_resize(const coel::window::Resize &e) {
+    window_size[0] = e.width;
+    window_size[1] = e.height;
+}
+
+int main() {
+    coel::window::callback::set::window::resize(window_resize);
+
+    coel::Window window = coel::window::create(window_size[0], window_size[1], "Window");
+    coel::Shader shader = coel::renderer::shader::create(s_vert_src, s_frag_src);
+    coel::Texture texture = coel::renderer::texture::create("player.png");
+
+    coel::renderer::batch::init();
+
+    while (coel::window::update(&window)) {
+        coel::renderer::clear(0.5, 0.5, 0.9, 1.0);
+        coel::renderer::shader::send_vec2(&shader, "screen_size", window_size);
+        coel::renderer::shader::send_vec2(&shader, "cam_pos", cam_pos);
+
+        coel::renderer::batch::begin(&shader);
+        coel::renderer::batch::submit(0, 0, window_size[0], window_size[1], &texture);
+        coel::renderer::batch::end();
+    }
+}
+
+/*
+#include "shader_src.hpp"
+#include <coel.hpp>
+
 #include <iostream>
 #include <vector>
 
 static coel::Window window;
 static coel::Shader shader;
 
-constexpr static double speed = 500, sensitivity = 0.00075f;
+constexpr static double    //
+    move_speed = 2000,     //
+    jump_speed = 400,      //
+    air_friction = 0,      //
+    ground_friction = 0.5, //
+    mid_air_slowdown = 1,  //
+    gravity_speed = 800;   //
+
+constexpr static unsigned short    //
+    pause_key = coel::key::Escape, //
+    jump_key = coel::key::W,       //
+    down_key = coel::key::S,       //
+    left_key = coel::key::A,       //
+    right_key = coel::key::D;      //
+
+static constexpr unsigned int chunk_size = 600;
 
 // Ordered as follows: Is on ground, none, none, none, Up, Down, Left, Right
 static unsigned char keys = 0b00000000;
@@ -20,12 +66,10 @@ static float screen_res[] = {1600, 900};
 struct Player {
     float pos_x, pos_y, vel_x, vel_y, w, h;
 };
-
 struct Camera {
     float x, y;
 };
-
-static Player player = {100, 200, 0, 0, 25, 25};
+static Player player = {100, 200, 0, 0, 32, 32};
 static Camera cam = {0, -150};
 
 void window_size(const coel::window::Resize &e) {
@@ -33,20 +77,20 @@ void window_size(const coel::window::Resize &e) {
     screen_res[1] = (float)e.height;
 }
 void key_press(const coel::key::Press &e) {
-    if (e.key == coel::key::W) keys |= 0x8;
-    if (e.key == coel::key::S) keys |= 0x4;
-    if (e.key == coel::key::A) keys |= 0x2;
-    if (e.key == coel::key::D) keys |= 0x1;
-    if (e.key == coel::key::Escape) {
+    if (e.key == jump_key) keys |= 0x8;
+    if (e.key == down_key) keys |= 0x4;
+    if (e.key == left_key) keys |= 0x2;
+    if (e.key == right_key) keys |= 0x1;
+    if (e.key == pause_key) {
         coel::window::set_cursor_visibility(&window, true);
         keys &= 0x7F;
     }
 }
 void key_release(const coel::key::Release &e) {
-    if (e.key == coel::key::W) keys &= 0xF7;
-    if (e.key == coel::key::S) keys &= 0xFB;
-    if (e.key == coel::key::A) keys &= 0xFD;
-    if (e.key == coel::key::D) keys &= 0xFE;
+    if (e.key == jump_key) keys &= 0xF7;
+    if (e.key == down_key) keys &= 0xFB;
+    if (e.key == left_key) keys &= 0xFD;
+    if (e.key == right_key) keys &= 0xFE;
 }
 void mouse_move(const coel::mouse::Move &e) {
     mouse[0] = (float)e.x;
@@ -63,13 +107,9 @@ void mouse_press(const coel::mouse::Press &e) {
 struct Box {
     float x, y, w, h;
 };
-
 struct Chunk {
     std::vector<Box> boxes;
 };
-
-static constexpr unsigned int chunk_size = 600;
-
 static Chunk world = {{
     {500, 0, 200, 50},
     {800, 75, 200, 50},
@@ -99,6 +139,8 @@ int main() {
 
     window = coel::window::create(screen_res[0], screen_res[1], "test window");
     shader = coel::renderer::shader::create(s_vert_src, s_frag_src);
+    coel::Texture player_texture = coel::renderer::texture::create("player.png");
+    // coel::Texture ground_texture = coel::renderer::texture::create("ground.png");
     coel::renderer::batch::init();
     double prev_time = 0.0;
 
@@ -114,34 +156,33 @@ int main() {
         coel::renderer::shader::send_float(&shader, "time", static_cast<float>(time));
 
         coel::renderer::batch::begin(&shader);
-        coel::renderer::batch::submit(0, -1000, screen_res[0], 1000);
-        for (Box box : world.boxes) {
-            coel::renderer::batch::submit(box.x, box.y, box.w, box.h);
-        }
+        coel::renderer::batch::submit(0, -1000, screen_res[0], 1000, nullptr);
+        for (Box box : world.boxes)
+            coel::renderer::batch::submit(box.x, box.y, box.w, box.h, nullptr);
 
         if (keys & 0x80) {
             coel::window::set_cursor_pos(&window, screen_res[0] / 2, screen_res[1] / 2);
 
-            player.vel_y *= 1.0 - elapsed / 5;     // apply "friction"
-            if (keys & 0x40) {                     // is on a surface
-                player.vel_x *= 1.0 - elapsed * 4; // apply "friction"
+            player.vel_y *= 1.0 - elapsed * air_friction;        // apply "friction"
+            if (keys & 0x40) {                                   // is on a surface
+                player.vel_x *= 1.0 - elapsed * ground_friction; // apply "friction"
                 if (keys & 0x8) {
-                    player.vel_y = speed * 1.6;
+                    player.vel_y = jump_speed;
                     keys &= 0xBF;
                 }
                 // if (keys & 0x4) player.vel_y -= speed / 250;
-                if (keys & 0x2) player.vel_x -= speed / 300; // speed up left
-                if (keys & 0x1) player.vel_x += speed / 300; // speed up right
+                if (keys & 0x2) player.vel_x -= move_speed * elapsed; // speed up left
+                if (keys & 0x1) player.vel_x += move_speed * elapsed; // speed up right
             }
             if (keys & 0x2) {
-                if (player.vel_x > 0.f) player.vel_x *= 1.0 - elapsed * 8; // slow left mid air
+                if (player.vel_x > 0.f) player.vel_x *= 1.0 - elapsed * mid_air_slowdown; // slow left mid air
             }
             if (keys & 0x1) {
-                if (player.vel_x < 0.f) player.vel_x += speed / 300; // speed up right
+                if (player.vel_x < 0.f) player.vel_x *= 1.0 - elapsed * mid_air_slowdown; // speed up right
             }
-            player.vel_y -= speed * elapsed * 5;    // gravity
-            player.pos_y += player.vel_y * elapsed; // move x
-            player.pos_x += player.vel_x * elapsed; // move y
+            player.vel_y -= gravity_speed * elapsed; // gravity
+            player.pos_y += player.vel_y * elapsed;  // move x
+            player.pos_x += player.vel_x * elapsed;  // move y
 
             // if the player is underground
             if (player.pos_y < 0) {
@@ -176,7 +217,7 @@ int main() {
                             else
                                 side = 2;
                         } else if (player.vel_y > 0.f) { // either 2 or 3 (right bottom)
-                            if (y_int < box.y)
+                            if (y_int < box.y - player.h)
                                 side = 3;
                             else
                                 side = 2;
@@ -184,13 +225,14 @@ int main() {
                             side = 2;
                         }
                     } else if (player.vel_x > 0.f) {
-                        float y_int = (box.x - player.pos_x) * vel_slope + player.pos_y;
                         if (player.vel_y < 0.f) { // either 1 or 4 (left top)
+                            float y_int = (box.x - player.pos_x - player.w) * vel_slope + player.pos_y;
                             if (y_int > box.y + box.h)
                                 side = 4;
                             else
                                 side = 1;
                         } else if (player.vel_y > 0.f) { // either 1 or 3 (left bottom)
+                            float y_int = (box.x - player.pos_x) * vel_slope + player.pos_y;
                             if (y_int < box.y)
                                 side = 3;
                             else
@@ -232,7 +274,8 @@ int main() {
             }
         }
 
-        coel::renderer::batch::submit(player.pos_x, player.pos_y, player.w, player.h);
+        coel::renderer::batch::submit(player.pos_x, player.pos_y, player.w, player.h, nullptr);
         coel::renderer::batch::end();
     }
 }
+*/

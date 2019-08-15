@@ -7,6 +7,7 @@ include_dir = {}
 include_dir["coel"] = "%{wks.location}/coel/src"
 include_dir["glad"] = "%{wks.location}/glad/include"
 include_dir["glfw"] = "%{wks.location}/glfw/include"
+include_dir["stb_image"] = "%{wks.location}/stb_image/include"
 
 startproject "testing"
 

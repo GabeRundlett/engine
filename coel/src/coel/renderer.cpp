@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 #include "glad/glad.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #ifndef _CONFIG_RELEASE
 #include <iostream>
@@ -53,11 +55,21 @@ namespace coel { namespace renderer { namespace _internal {
         //
         //
 
+        namespace texture {
+            Texture create(const char *file_path) { return {0, 0, 0}; }
+        } // namespace texture
+
+        //
+        //
+        //
+        //
+        //
+
         namespace batch {
             void init() {}
             void begin(Shader *const shader) {}
             void submit(const float pos[2], const float size[2]) {}
-            void submit(const float x, const float y, const float w, const float h) {}
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture) {}
             void end() {}
         } // namespace batch
 
@@ -146,11 +158,21 @@ namespace coel { namespace renderer { namespace _internal {
         //
         //
 
+        namespace texture {
+            Texture create(const char *file_path) { return {0, 0, 0}; }
+        } // namespace texture
+
+        //
+        //
+        //
+        //
+        //
+
         namespace batch {
             void init() {}
             void begin(Shader *const shader) {}
             void submit(const float pos[2], const float size[2]) {}
-            void submit(const float x, const float y, const float w, const float h) {}
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture) {}
             void end() {}
         } // namespace batch
 
@@ -239,11 +261,21 @@ namespace coel { namespace renderer { namespace _internal {
         //
         //
 
+        namespace texture {
+            Texture create(const char *file_path) { return {0, 0, 0}; }
+        } // namespace texture
+
+        //
+        //
+        //
+        //
+        //
+
         namespace batch {
             void init() {}
             void begin(Shader *const shader) {}
             void submit(const float pos[2], const float size[2]) {}
-            void submit(const float x, const float y, const float w, const float h) {}
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture) {}
             void end() {}
         } // namespace batch
 
@@ -442,10 +474,38 @@ namespace coel { namespace renderer { namespace _internal {
         //
         //
 
+        namespace texture {
+            Texture slot[32];
+            unsigned int texture_count = 0;
+            Texture create(const char *file_path) {
+                Texture result;
+                unsigned char *data = stbi_load(file_path, &result.width, &result.height, &result.channels, 0);
+                glGenTextures(1, &result.id);
+                glBindTexture(GL_TEXTURE_2D, result.id);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, result.width, result.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+                stbi_image_free(data);
+                slot[texture_count] = result;
+                ++texture_count;
+                return result;
+            }
+        } // namespace texture
+
+        //
+        //
+        //
+        //
+        //
+
         namespace batch {
             // max sprites is 16383 because that is the floored version of 65535 / 4
             struct VertexData {
                 float x, y, u, v;
+                float tid;
             };
             static constexpr unsigned int s_max_sprites = 16383, s_vertex_size = sizeof(VertexData),
                                           s_sprite_size = s_vertex_size * 4, s_max_index = s_max_sprites * 6,
@@ -468,8 +528,10 @@ namespace coel { namespace renderer { namespace _internal {
                 // Assign the vertex attributes
                 glEnableVertexAttribArray(0);
                 glEnableVertexAttribArray(1);
+                glEnableVertexAttribArray(2);
                 glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, s_vertex_size, reinterpret_cast<const void *>(0));
                 glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, s_vertex_size, reinterpret_cast<const void *>(8));
+                glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, s_vertex_size, reinterpret_cast<const void *>(16));
                 // Fill the index array
                 unsigned int offset = 0;
                 for (unsigned int i = 0; i < s_max_index; i += 6) {
@@ -492,40 +554,58 @@ namespace coel { namespace renderer { namespace _internal {
                 glBindBuffer(GL_ARRAY_BUFFER, s_vbo_id);
                 s_buffer_pointer = reinterpret_cast<VertexData *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
             }
-            void submit(const float pos[2], const float size[2]) { submit(pos[0], pos[1], size[0], size[1]); }
-            void submit(const float x, const float y, const float w, const float h) {
+            void submit(const float pos[2], const float size[2], const Texture *const texture) {
+                submit(pos[0], pos[1], size[0], size[1], texture);
+            }
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture) {
                 s_index_count += 6;
                 if (s_index_count > s_max_index) {
                     end();
                     begin(s_current_shader);
                 }
+                float texture_id = -1;
+
+                if (texture)
+                    for (unsigned int i = 0; i < 32; ++i)
+                        if (texture->id == texture::slot[i].id) {
+                            texture_id = i;
+                            break;
+                        }
 
                 s_buffer_pointer->x = x;
                 s_buffer_pointer->y = y;
                 s_buffer_pointer->u = 0;
-                s_buffer_pointer->v = 0;
+                s_buffer_pointer->v = 1;
+                s_buffer_pointer->tid = texture_id;
                 ++s_buffer_pointer;
 
                 s_buffer_pointer->x = x + w;
                 s_buffer_pointer->y = y;
-                s_buffer_pointer->u = 1;
-                s_buffer_pointer->v = 0;
+                s_buffer_pointer->u = w / h;
+                s_buffer_pointer->v = 1;
+                s_buffer_pointer->tid = texture_id;
                 ++s_buffer_pointer;
 
                 s_buffer_pointer->x = x;
                 s_buffer_pointer->y = y + h;
                 s_buffer_pointer->u = 0;
-                s_buffer_pointer->v = 1;
+                s_buffer_pointer->v = 0;
+                s_buffer_pointer->tid = texture_id;
                 ++s_buffer_pointer;
 
                 s_buffer_pointer->x = x + w;
                 s_buffer_pointer->y = y + h;
-                s_buffer_pointer->u = 1;
-                s_buffer_pointer->v = 1;
+                s_buffer_pointer->u = w / h;
+                s_buffer_pointer->v = 0;
+                s_buffer_pointer->tid = texture_id;
                 ++s_buffer_pointer;
             }
             void end() {
                 glUnmapBuffer(GL_ARRAY_BUFFER);
+                /*for (unsigned int i = 0; i < 32; ++i) {
+                    glActiveTexture(GL_TEXTURE0 + i);
+                    glBindTexture(GL_TEXTURE_2D, texture::slot[i].id);
+                }*/
 
                 glBindVertexArray(s_vao_id);
                 glDrawElements(GL_TRIANGLES, s_index_count, GL_UNSIGNED_SHORT, nullptr);

@@ -38,6 +38,10 @@ struct IBO {
 struct Shader {
     unsigned int id;
 };
+struct Texture {
+    unsigned int id;
+    int width, height, channels;
+};
 } // namespace coel
 
 namespace coel { namespace renderer { namespace _internal {
@@ -66,11 +70,14 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace texture {
+            Texture create(const char *file_path);
+        }
         namespace batch {
             void init();
             void begin(Shader *const shader);
             void submit(const float pos[2], const float size[2]);
-            void submit(const float x, const float y, const float w, const float h);
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture);
             void end();
         } // namespace batch
         void clear(const unsigned int value);
@@ -103,11 +110,14 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace texture {
+            Texture create(const char *file_path);
+        }
         namespace batch {
             void init();
             void begin(Shader *const shader);
             void submit(const float pos[2], const float size[2]);
-            void submit(const float x, const float y, const float w, const float h);
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture);
             void end();
         } // namespace batch
         void clear(const unsigned int value);
@@ -140,11 +150,14 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace texture {
+            Texture create(const char *file_path);
+        }
         namespace batch {
             void init();
             void begin(Shader *const shader);
             void submit(const float pos[2], const float size[2]);
-            void submit(const float x, const float y, const float w, const float h);
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture);
             void end();
         } // namespace batch
         void clear(const unsigned int value);
@@ -177,11 +190,14 @@ namespace coel { namespace renderer { namespace _internal {
             void send_mat3(const Shader *shader, const char *uniform_name, const float *data);
             void send_mat4(const Shader *shader, const char *uniform_name, const float *data);
         } // namespace shader
+        namespace texture {
+            Texture create(const char *file_path);
+        }
         namespace batch {
             void init();
             void begin(Shader *const shader);
             void submit(const float pos[2], const float size[2]);
-            void submit(const float x, const float y, const float w, const float h);
+            void submit(const float x, const float y, const float w, const float h, const Texture *const texture);
             void end();
         } // namespace batch
         void clear(const unsigned int value);
@@ -341,6 +357,24 @@ namespace coel { namespace renderer {
     //
     //
 
+    namespace texture {
+        template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API> Texture create(const char *file_path) {
+            switch (R) {
+            case RendererAPI::Agnostic: return _internal::agnostic::texture::create(file_path);
+            case RendererAPI::Vulkan: return _internal::vulkan::texture::create(file_path);
+            case RendererAPI::Direct3D: return _internal::direct3d::texture::create(file_path);
+            case RendererAPI::OpenGL: return _internal::opengl::texture::create(file_path);
+            default: return {0, 0, 0};
+            }
+        }
+    } // namespace texture
+
+    //
+    //
+    //
+    //
+    //
+
     namespace batch {
         template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API> void init() {
             switch (R) {
@@ -371,12 +405,12 @@ namespace coel { namespace renderer {
             }
         }
         template <RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API>
-        void submit(const float x, const float y, const float w, const float h) {
+        void submit(const float x, const float y, const float w, const float h, const Texture *const texture) {
             switch (R) {
-            case RendererAPI::Agnostic: _internal::agnostic::batch::submit(x, y, w, h); return;
-            case RendererAPI::Vulkan: _internal::vulkan::batch::submit(x, y, w, h); return;
-            case RendererAPI::Direct3D: _internal::direct3d::batch::submit(x, y, w, h); return;
-            case RendererAPI::OpenGL: _internal::opengl::batch::submit(x, y, w, h); return;
+            case RendererAPI::Agnostic: _internal::agnostic::batch::submit(x, y, w, h, texture); return;
+            case RendererAPI::Vulkan: _internal::vulkan::batch::submit(x, y, w, h, texture); return;
+            case RendererAPI::Direct3D: _internal::direct3d::batch::submit(x, y, w, h, texture); return;
+            case RendererAPI::OpenGL: _internal::opengl::batch::submit(x, y, w, h, texture); return;
             default: return;
             }
         }

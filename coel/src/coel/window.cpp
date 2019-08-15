@@ -179,6 +179,9 @@ namespace coel { namespace window { namespace _internal {
                 // init opengl context
                 gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
                 // set callbacks
                 glfwSetKeyCallback(result, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
                     switch (action) {

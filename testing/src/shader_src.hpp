@@ -3,26 +3,37 @@
 constexpr char s_vert_src[] = R"(
 #version 330 core
 
-layout(location = 0) in vec2 pos;
-layout(location = 1) in vec2 tex;
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 tex_coord;
+layout(location = 2) in float tex_id;
 
 uniform vec2 mouse_pos;
 uniform vec2 screen_size;
 uniform vec2 cam_pos;
 uniform float time;
 
-out vec2 v_tex;
+out vec2 v_tex_coord;
+out float v_tex_id;
 
 void main() {
-    v_tex = tex;
-    gl_Position = vec4((2 * pos - 2 * cam_pos) / screen_size - 1, 0, 1);
+    v_tex_coord = tex_coord;
+    v_tex_id = tex_id;
+    gl_Position = vec4(2 * (position - cam_pos) / screen_size - 1, 0, 1);
 }
 )";
 
 constexpr char s_frag_src[] = R"(
 #version 330 core
 
-in vec2 v_tex;
+in vec2 v_tex_coord;
+in float v_tex_id;
+
+uniform vec2 mouse_pos;
+uniform vec2 screen_size;
+uniform vec2 cam_pos;
+uniform float time;
+
+uniform sampler2D tex;
 
 out vec4 color;
 
@@ -33,6 +44,9 @@ out vec4 color;
 // }
 
 void main() {
-    color = vec4(1, 0.5, 0.5, 1);
+	if (v_tex_id == -1)
+		color = vec4(0.5, 0.7, 0.4, 1);
+	else
+		color = texture(tex, v_tex_coord);
 }
 )";
