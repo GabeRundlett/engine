@@ -1,442 +1,241 @@
-#pragma once
-#include "event.hpp"
-#include "renderer.hpp"
-
-// Add new Window APIs
-#define COEL_SET_DEFAULT_WINDOW_API_GLFW
-
-#ifdef COEL_SET_DEFAULT_WINDOW_API_GLFW
-#define _COEL_DEFAULT_WINDOW_API GLFW
-#endif
-#ifdef COEL_SET_DEFAULT_WINDOW_API_WIN32
-#define _COEL_DEFAULT_WINDOW_API Win32
-#endif
-#ifdef COEL_SET_DEFAULT_WINDOW_API_AGNOSTIC
-#define _COEL_DEFAULT_WINDOW_API Agnostic
-#endif
-#ifndef _COEL_DEFAULT_WINDOW_API
-#ifdef _CONFIG_PLATFORM_WINDOWS
-#define _COEL_DEFAULT_WINDOW_API Win32
-#else
-#ifdef _CONFIG_PLATFORM_LINUX
-#define _COEL_DEFAULT_WINDOW_API GLFW
-#else
-#define _COEL_DEFAULT_WINDOW_API Agnostic
-#endif
-#endif
-#endif
-
 namespace coel {
-enum class WindowAPI { None, Agnostic, Win32, GLFW };
-struct Window {
-    WindowAPI window_api;
-    RendererAPI renderer_api;
-    void *handle;
-    int width, height;
-};
+    struct KeyPress {
+        int key, scancode, mods;
+    };
+    struct KeyRepeat {
+        int key, scancode, mods;
+    };
+    struct KeyRelease {
+        int key, scancode, mods;
+    };
 } // namespace coel
 
-//
-//
-//
-//
-//
+namespace coel {
+    struct MousePress {
+        int button, mods;
+    };
+    struct MouseRelease {
+        int button, mods;
+    };
+    struct MouseScroll {
+        double x, y;
+    };
+    struct MouseMove {
+        double x, y;
+    };
+} // namespace coel
 
-namespace coel { namespace window { namespace _internal {
-    namespace agnostic {
-        namespace callback { namespace set {
-            namespace mouse {
-                void press(void (*const func)(const coel::mouse::Press &));
-                void release(void (*const func)(const coel::mouse::Release &));
-                void scroll(void (*const func)(const coel::mouse::Scroll &));
-                void move(void (*const func)(const coel::mouse::Move &));
-            } // namespace mouse
-            namespace key {
-                void press(void (*const func)(const coel::key::Press &));
-                void repeat(void (*const func)(const coel::key::Repeat &));
-                void release(void (*const func)(const coel::key::Release &));
-            } // namespace key
-            namespace window {
-                void move(void (*const func)(const coel::window::Move &));
-                void resize(void (*const func)(const coel::window::Resize &));
-                void close(void (*const func)(const coel::window::Close &));
-                void focus(void (*const func)(const coel::window::Focus &));
-                void defocus(void (*const func)(const coel::window::Defocus &));
-            } // namespace window
-        }}    // namespace callback::set
-        namespace create {
-            Window agnostic(const int width, const int height, const char *title);
-            Window vulkan(const int width, const int height, const char *title);
-            Window direct3d(const int width, const int height, const char *title);
-            Window opengl(const int width, const int height, const char *title);
-        } // namespace create
-        namespace update {
-            bool agnostic(const Window *window);
-            bool vulkan(const Window *window);
-            bool direct3d(const Window *window);
-            bool opengl(const Window *window);
-        } // namespace update
-        void set_cursor_pos(const Window *window, const float x, const float y);
-        void set_cursor_visibility(const Window *window, const bool value);
-        double get_time();
-    } // namespace agnostic
+namespace coel {
+    struct WindowMove {
+        int x, y;
+    };
+    struct WindowResize {
+        int width, height;
+    };
+    struct WindowClose {};
+    struct WindowFocus {};
+    struct WindowDefocus {};
+} // namespace coel
 
-    //
-    //
-    //
-    //
-    //
-    namespace glfw {
-        namespace callback { namespace set {
-            namespace mouse {
-                void press(void (*const func)(const coel::mouse::Press &));
-                void release(void (*const func)(const coel::mouse::Release &));
-                void scroll(void (*const func)(const coel::mouse::Scroll &));
-                void move(void (*const func)(const coel::mouse::Move &));
-            } // namespace mouse
-            namespace key {
-                void press(void (*const func)(const coel::key::Press &));
-                void repeat(void (*const func)(const coel::key::Repeat &));
-                void release(void (*const func)(const coel::key::Release &));
-            } // namespace key
-            namespace window {
-                void move(void (*const func)(const coel::window::Move &));
-                void resize(void (*const func)(const coel::window::Resize &));
-                void close(void (*const func)(const coel::window::Close &));
-                void focus(void (*const func)(const coel::window::Focus &));
-                void defocus(void (*const func)(const coel::window::Defocus &));
-            } // namespace window
-        }}    // namespace callback::set
-        namespace create {
-            Window agnostic(const int width, const int height, const char *title);
-            Window vulkan(const int width, const int height, const char *title);
-            Window direct3d(const int width, const int height, const char *title);
-            Window opengl(const int width, const int height, const char *title);
-        } // namespace create
-        namespace update {
-            bool agnostic(const Window *window);
-            bool vulkan(const Window *window);
-            bool direct3d(const Window *window);
-            bool opengl(const Window *window);
-        } // namespace update
-        void set_cursor_pos(const Window *window, const float x, const float y);
-        void set_cursor_visibility(const Window *window, const bool value);
-        double get_time();
-    } // namespace glfw
+namespace coel {
+    enum class KeyCode : const unsigned short {
+        Space = 32,
+        Apostrophe = 39,
+        Comma = 44,
+        Minus = 45,
+        Period = 46,
+        Slash = 47,
 
-    //
-    //
-    //
-    //
-    //
-    namespace win32 {
-        namespace callback { namespace set {
-            namespace mouse {
-                void press(void (*const func)(const coel::mouse::Press &));
-                void release(void (*const func)(const coel::mouse::Release &));
-                void scroll(void (*const func)(const coel::mouse::Scroll &));
-                void move(void (*const func)(const coel::mouse::Move &));
-            } // namespace mouse
-            namespace key {
-                void press(void (*const func)(const coel::key::Press &));
-                void repeat(void (*const func)(const coel::key::Repeat &));
-                void release(void (*const func)(const coel::key::Release &));
-            } // namespace key
-            namespace window {
-                void move(void (*const func)(const coel::window::Move &));
-                void resize(void (*const func)(const coel::window::Resize &));
-                void close(void (*const func)(const coel::window::Close &));
-                void focus(void (*const func)(const coel::window::Focus &));
-                void defocus(void (*const func)(const coel::window::Defocus &));
-            } // namespace window
-        }}    // namespace callback::set
-        namespace create {
-            Window agnostic(const int width, const int height, const char *title);
-            Window vulkan(const int width, const int height, const char *title);
-            Window direct3d(const int width, const int height, const char *title);
-            Window opengl(const int width, const int height, const char *title);
-        } // namespace create
-        namespace update {
-            bool agnostic(const Window *window);
-            bool vulkan(const Window *window);
-            bool direct3d(const Window *window);
-            bool opengl(const Window *window);
-        } // namespace update
-        void set_cursor_pos(const Window *window, const float x, const float y);
-        void set_cursor_visibility(const Window *window, const bool value);
-        double get_time();
-    } // namespace win32
-}}}   // namespace coel::window::_internal
+        SemiColon = 59,
+        Equal = 60,
 
-//
-//
-//
-//
-//
+        LeftBracket = 91,
+        RightBracket = 93,
+        Backslash = 92,
+        GraveAccent = 96,
 
-//
-//
-//
-//
-//
+        World1 = 161,
+        World2 = 162,
 
-namespace coel { namespace window {
-    namespace callback { namespace set {
-        namespace mouse {
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void move(void (*const func)(const coel::mouse::Move &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::mouse::move(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::mouse::move(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::mouse::move(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void scroll(void (*const func)(const coel::mouse::Scroll &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::mouse::scroll(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::mouse::scroll(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::mouse::scroll(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void press(void (*const func)(const coel::mouse::Press &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::mouse::press(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::mouse::press(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::mouse::press(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void release(void (*const func)(const coel::mouse::Release &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::mouse::release(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::mouse::release(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::mouse::release(func); return;
-                default: return;
-                }
-            }
-        } // namespace mouse
+        Escape = 256,
+        Enter = 257,
+        Tab = 258,
+        Backspace = 259,
+        Insert = 260,
+        Delete = 261,
+        Left = 262,
+        Right = 263,
+        Down = 264,
+        Up = 265,
+        PageUp = 266,
+        PageDown = 267,
+        Home = 268,
+        End = 269,
+        CapsLock = 280,
+        ScrollLock = 281,
+        NumLock = 282,
+        PrintScreen = 283,
+        PauseBreak = 284,
 
-        //
-        //
-        //
-        //
-        //
+        LeftShift = 340,
+        LeftControl = 341,
+        LeftAlt = 342,
+        LeftMenu = 343,
 
-        namespace key {
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void press(void (*const func)(const coel::key::Press &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::key::press(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::key::press(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::key::press(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void repeat(void (*const func)(const coel::key::Repeat &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::key::repeat(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::key::repeat(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::key::repeat(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void release(void (*const func)(const coel::key::Release &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::key::release(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::key::release(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::key::release(func); return;
-                default: return;
-                }
-            }
-        } // namespace key
+        RightShift = 344,
+        RightControl = 345,
+        RightAlt = 346,
+        RightMenu = 347,
 
-        //
-        //
-        //
-        //
-        //
+        Menu = 348,
 
-        namespace window {
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void move(void (*const func)(const coel::window::Move &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::window::move(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::window::move(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::window::move(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void resize(void (*const func)(const coel::window::Resize &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::window::resize(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::window::resize(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::window::resize(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void close(void (*const func)(const coel::window::Close &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::window::close(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::window::close(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::window::close(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void focus(void (*const func)(const coel::window::Focus &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::window::focus(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::window::focus(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::window::focus(func); return;
-                default: return;
-                }
-            }
-            template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-            void defocus(void (*const func)(const coel::window::Defocus &)) {
-                switch (W) {
-                case WindowAPI::Agnostic: _internal::agnostic::callback::set::window::defocus(func); return;
-                case WindowAPI::Win32: _internal::win32::callback::set::window::defocus(func); return;
-                case WindowAPI::GLFW: _internal::glfw::callback::set::window::defocus(func); return;
-                default: return;
-                }
-            }
-        } // namespace window
-    }}    // namespace callback::set
+        NumRow0 = 48,
+        NumRow1 = 49,
+        NumRow2 = 50,
+        NumRow3 = 51,
+        NumRow4 = 52,
+        NumRow5 = 53,
+        NumRow6 = 54,
+        NumRow7 = 55,
+        NumRow8 = 56,
+        NumRow9 = 57,
 
-    //
-    //
-    //
-    //
-    //
+        Numpad0 = 320,
+        Numpad1 = 321,
+        Numpad2 = 322,
+        Numpad3 = 323,
+        Numpad4 = 324,
+        Numpad5 = 325,
+        Numpad6 = 326,
+        Numpad7 = 327,
+        Numpad8 = 328,
+        Numpad9 = 329,
 
-    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API, RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API>
-    Window create(const int width, const int height, const char *title) {
-        switch (W) {
-        case WindowAPI::Agnostic:
-            switch (R) {
-            case RendererAPI::Agnostic: return _internal::agnostic::create::agnostic(width, height, title);
-            case RendererAPI::Vulkan: return _internal::agnostic::create::vulkan(width, height, title);
-            case RendererAPI::Direct3D: return _internal::agnostic::create::direct3d(width, height, title);
-            case RendererAPI::OpenGL: return _internal::agnostic::create::opengl(width, height, title);
-            default: return {WindowAPI::Agnostic, RendererAPI::None, nullptr, width, height};
-            }
-        case WindowAPI::Win32:
-            switch (R) {
-            case RendererAPI::Agnostic: return _internal::win32::create::agnostic(width, height, title);
-            case RendererAPI::Vulkan: return _internal::win32::create::vulkan(width, height, title);
-            case RendererAPI::Direct3D: return _internal::win32::create::direct3d(width, height, title);
-            case RendererAPI::OpenGL: return _internal::win32::create::opengl(width, height, title);
-            default: return {WindowAPI::Win32, RendererAPI::None, nullptr, width, height};
-            }
-        case WindowAPI::GLFW:
-            switch (R) {
-            case RendererAPI::Agnostic: return _internal::glfw::create::agnostic(width, height, title);
-            case RendererAPI::Vulkan: return _internal::glfw::create::vulkan(width, height, title);
-            case RendererAPI::Direct3D: return _internal::glfw::create::direct3d(width, height, title);
-            case RendererAPI::OpenGL: return _internal::glfw::create::opengl(width, height, title);
-            default: return {WindowAPI::GLFW, RendererAPI::None, nullptr, width, height};
-            }
-        default:
-            switch (R) {
-            case RendererAPI::Agnostic: return {WindowAPI::None, RendererAPI::Agnostic, 0, width, height};
-            case RendererAPI::Vulkan: return {WindowAPI::None, RendererAPI::Vulkan, 0, width, height};
-            case RendererAPI::Direct3D: return {WindowAPI::None, RendererAPI::Direct3D, 0, width, height};
-            case RendererAPI::OpenGL: return {WindowAPI::None, RendererAPI::OpenGL, 0, width, height};
-            default: return {WindowAPI::None, RendererAPI::None, nullptr, width, height};
-            }
-        }
-    }
+        Decimal = 330,
+        Divide = 331,
+        Multiply = 332,
+        Subtract = 333,
+        Add = 334,
+        NumpadEnter = 335,
+        NumpadEqual = 336,
 
-    //
-    //
-    //
-    //
-    //
+        F1 = 290,
+        F2 = 291,
+        F3 = 292,
+        F4 = 293,
+        F5 = 294,
+        F6 = 295,
+        F7 = 296,
+        F8 = 297,
+        F9 = 298,
+        F10 = 299,
+        F11 = 300,
+        F12 = 301,
+        F13 = 302,
+        F14 = 303,
+        F15 = 304,
+        F16 = 305,
+        F17 = 306,
+        F18 = 307,
+        F19 = 308,
+        F20 = 309,
+        F21 = 310,
+        F22 = 311,
+        F23 = 312,
+        F24 = 313,
+        F25 = 314,
 
-    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API, RendererAPI R = RendererAPI::_COEL_DEFAULT_RENDERER_API>
-    bool update(const Window *window) {
-        switch (W) {
-        case WindowAPI::Agnostic:
-            switch (R) {
-            case RendererAPI::Agnostic: return _internal::agnostic::update::agnostic(window);
-            case RendererAPI::Vulkan: return _internal::agnostic::update::vulkan(window);
-            case RendererAPI::Direct3D: return _internal::agnostic::update::direct3d(window);
-            case RendererAPI::OpenGL: return _internal::agnostic::update::opengl(window);
-            default: return false;
-            }
-        case WindowAPI::Win32:
-            switch (R) {
-            case RendererAPI::Agnostic: return _internal::win32::update::agnostic(window);
-            case RendererAPI::Vulkan: return _internal::win32::update::vulkan(window);
-            case RendererAPI::Direct3D: return _internal::win32::update::direct3d(window);
-            case RendererAPI::OpenGL: return _internal::win32::update::opengl(window);
-            default: return false;
-            }
-        case WindowAPI::GLFW:
-            switch (R) {
-            case RendererAPI::Agnostic: return _internal::glfw::update::agnostic(window);
-            case RendererAPI::Vulkan: return _internal::glfw::update::vulkan(window);
-            case RendererAPI::Direct3D: return _internal::glfw::update::direct3d(window);
-            case RendererAPI::OpenGL: return _internal::glfw::update::opengl(window);
-            default: return false;
-            }
-        default: return false;
-        }
-    }
+        A = 65,
+        B = 66,
+        C = 67,
+        D = 68,
+        E = 69,
+        F = 70,
+        G = 71,
+        H = 72,
+        I = 73,
+        J = 74,
+        K = 75,
+        L = 76,
+        M = 77,
+        N = 78,
+        O = 79,
+        P = 80,
+        Q = 81,
+        R = 82,
+        S = 83,
+        T = 84,
+        U = 85,
+        V = 86,
+        W = 87,
+        X = 88,
+        Y = 89,
+        Z = 90
+    };
+    enum class KeyMods : const unsigned short { Shift = 1, Control = 2, Alt = 4, Windows = 8, CapsLock = 16, NumLock = 32 };
+    enum class MouseButton : const unsigned short {
+        Button1 = 0,
+        Button2 = 1,
+        Button3 = 2,
+        Button4 = 3,
+        Button5 = 4,
+        Button6 = 5,
+        Button7 = 6,
+        Button8 = 7,
+        Left = Button1,
+        Right = Button2,
+        Middle = Button3
+    };
+} // namespace coel
 
-    //
-    //
-    //
-    //
-    //
-
-    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-    void set_cursor_pos(const Window *window, const float x, const float y) {
-        switch (W) {
-        case WindowAPI::Agnostic: _internal::agnostic::set_cursor_pos(window, x, y); return;
-        case WindowAPI::Win32: _internal::win32::set_cursor_pos(window, x, y); return;
-        case WindowAPI::GLFW: _internal::glfw::set_cursor_pos(window, x, y); return;
-        default: return;
-        }
-    }
-
-    //
-    //
-    //
-    //
-    //
-
-    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API>
-    void set_cursor_visibility(const Window *window, const bool value) {
-        switch (W) {
-        case WindowAPI::Agnostic: _internal::agnostic::set_cursor_visibility(window, value); return;
-        case WindowAPI::Win32: _internal::win32::set_cursor_visibility(window, value); return;
-        case WindowAPI::GLFW: _internal::glfw::set_cursor_visibility(window, value); return;
-        default: return;
-        }
-    }
-
-    //
-    //
-    //
-    //
-    //
-
-    template <WindowAPI W = WindowAPI::_COEL_DEFAULT_WINDOW_API> double get_time() {
-        switch (W) {
-        case WindowAPI::Agnostic: return _internal::agnostic::get_time();
-        case WindowAPI::Win32: return _internal::win32::get_time();
-        case WindowAPI::GLFW: return _internal::glfw::get_time();
-        default: return 0.0;
-        }
-    }
-}} // namespace coel::window
+namespace coel {
+    struct Window {
+        unsigned int width, height;
+        const char *const title;
+        void *window_handle;
+        Window(const unsigned int width, const unsigned int height, const char *const title);
+        const bool update();
+        virtual void key_press(const KeyPress &e) {}
+        virtual void key_repeat(const KeyRepeat &e) {}
+        virtual void key_release(const KeyRelease &e) {}
+        virtual void mouse_press(const MousePress &e) {}
+        virtual void mouse_release(const MouseRelease &e) {}
+        virtual void mouse_scroll(const MouseScroll &e) {}
+        virtual void mouse_move(const MouseMove &e) {}
+        virtual void window_move(const WindowMove &e) {}
+        virtual void window_resize(const WindowResize &e) {}
+        virtual void window_close(const WindowClose &e) {}
+        virtual void window_focus(const WindowFocus &e) {}
+        virtual void window_defocus(const WindowDefocus &e) {}
+    };
+    struct Shader {
+        const char *const vert_src, *const frag_src;
+        Shader(const char *const vert_src, const char *const frag_src);
+    };
+    struct Texture {
+        unsigned int width, height;
+        const char *const filepath;
+        Texture(const char *const filepath);
+    };
+    struct Model {
+        const float *pos_data;
+        const unsigned short *ind_data;
+        Model(const char *const filepath);
+        Model(const float *pos_data, const unsigned short *ind_data);
+    };
+    struct Material {
+        const Shader *const shader;
+        const Texture *const textures;
+        Material(const Shader *const shader, const Texture textures[32]);
+    };
+    struct Renderable {
+        const Model *const model;
+        const Material *const material;
+        Renderable(const Model *const model, const Material *const material);
+    };
+    namespace renderer {
+        void clear(unsigned int color);
+        void submit(const Renderable *const r);
+        void flush();
+    } // namespace renderer
+} // namespace coel

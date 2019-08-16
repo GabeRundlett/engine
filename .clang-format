@@ -6,6 +6,6 @@ SortUsingDeclarations: false
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortBlocksOnASingleLine: true
-NamespaceIndentation: Inner
+NamespaceIndentation: All
 CompactNamespaces: true
 ColumnLimit: 128

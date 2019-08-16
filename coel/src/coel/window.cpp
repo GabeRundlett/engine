@@ -1,366 +1,103 @@
 #include "window.hpp"
-#include "GLFW/glfw3.h"
-#include "glad/glad.h"
 
-namespace coel { namespace window { namespace _internal {
-    namespace agnostic {
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
-        //
-        //
-        //
-        //
-        //
-
-        namespace callback { namespace set {
-            namespace mouse {
-                void press(void (*const func)(const coel::mouse::Press &)) {}
-                void release(void (*const func)(const coel::mouse::Release &)) {}
-                void scroll(void (*const func)(const coel::mouse::Scroll &)) {}
-                void move(void (*const func)(const coel::mouse::Move &)) {}
-            } // namespace mouse
-
-            namespace key {
-                void press(void (*const func)(const coel::key::Press &)) {}
-                void repeat(void (*const func)(const coel::key::Repeat &)) {}
-                void release(void (*const func)(const coel::key::Release &)) {}
-            } // namespace key
-
-            namespace window {
-                void move(void (*const func)(const coel::window::Move &)) {}
-                void resize(void (*const func)(const coel::window::Resize &)) {}
-                void close(void (*const func)(const coel::window::Close &)) {}
-                void focus(void (*const func)(const coel::window::Focus &)) {}
-                void defocus(void (*const func)(const coel::window::Defocus &)) {}
-            } // namespace window
-        }}    // namespace callback::set
-
-        //
-        //
-        //
-        //
-        //
-
-        namespace create {
-            Window agnostic(const int width, const int height, const char *title) {
-                return {WindowAPI::Agnostic, RendererAPI::Agnostic, nullptr, width, height};
+namespace coel {
+    Window::Window(const unsigned int width, const unsigned int height, const char *const title)
+        : width(width), height(height), title(title) {
+        // init window manager
+        glfwInit();
+        GLFWwindow *result = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        window_handle = reinterpret_cast<void *>(result);
+        glfwMakeContextCurrent(result);
+        // window manager prop
+        glfwSwapInterval(false);
+        glfwSetWindowUserPointer(result, this);
+        // init opengl context
+        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        // opengl prop
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // set window callbacks
+        glfwSetKeyCallback(result, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            switch (action) {
+            case GLFW_PRESS: window->key_press({key, scancode, mods}); break;
+            case GLFW_REPEAT: window->key_repeat({key, scancode, mods}); break;
+            case GLFW_RELEASE: window->key_release({key, scancode, mods}); break;
             }
-            Window vulkan(const int width, const int height, const char *title) {
-                return {WindowAPI::Agnostic, RendererAPI::Vulkan, nullptr, width, height};
+        });
+        glfwSetMouseButtonCallback(result, [](GLFWwindow *w, int button, int action, int mods) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            switch (action) {
+            case GLFW_PRESS: window->mouse_press({button, mods}); break;
+            case GLFW_RELEASE: window->mouse_release({button, mods}); break;
             }
-            Window direct3d(const int width, const int height, const char *title) {
-                return {WindowAPI::Agnostic, RendererAPI::Direct3D, nullptr, width, height};
+        });
+        glfwSetCursorPosCallback(result, [](GLFWwindow *w, double xPos, double yPos) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            window->mouse_move({xPos, yPos});
+        });
+        glfwSetScrollCallback(result, [](GLFWwindow *w, double xOffset, double yOffset) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            window->mouse_scroll({xOffset, yOffset});
+        });
+        glfwSetWindowPosCallback(result, [](GLFWwindow *w, int xPos, int yPos) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            window->window_move({xPos, yPos});
+        });
+        glfwSetWindowSizeCallback(result, [](GLFWwindow *w, int width, int height) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            // renderer::resize_viewport(width, height);
+            window->window_resize({width, height});
+        });
+        glfwSetWindowFocusCallback(result, [](GLFWwindow *w, int focus) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            switch (focus) {
+            case GLFW_TRUE: window->window_focus({}); return;
+            case GLFW_FALSE: window->window_defocus({}); return;
             }
-            Window opengl(const int width, const int height, const char *title) {
-                return {WindowAPI::Agnostic, RendererAPI::OpenGL, nullptr, width, height};
-            }
-        } // namespace create
+        });
+        glfwSetWindowCloseCallback(result, [](GLFWwindow *w) {
+            Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            window->window_close({});
+        });
+    }
+    const bool Window::update() {
+        GLFWwindow *window = reinterpret_cast<GLFWwindow *>(window_handle);
+        glfwPollEvents();
+        glfwSwapBuffers(window);
+        glClear(GL_COLOR_BUFFER_BIT);
+        return !glfwWindowShouldClose(window);
+    }
+    Shader::Shader(const char *const vert_src, const char *const frag_src) : vert_src(vert_src), frag_src(frag_src) {
+        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, 1, &vert_src, NULL);
+        glCompileShader(vertexShader);
 
-        //
-        //
-        //
-        //
-        //
+        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, 1, &frag_src, NULL);
+        glCompileShader(fragmentShader);
 
-        namespace update {
-            bool agnostic(const Window *window) { return false; }
-            bool vulkan(const Window *window) { return false; }
-            bool direct3d(const Window *window) { return false; }
-            bool opengl(const Window *window) { return false; }
-        } // namespace update
+        int shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
 
-        //
-        //
-        //
-        //
-        //
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
 
-        void set_cursor_pos(const Window *window, const float x, const float y) {}
-
-        //
-        //
-        //
-        //
-        //
-
-        void set_cursor_visibility(const Window *window, const bool value) {}
-
-        //
-        //
-        //
-        //
-        //
-
-        double get_time() { return 0.0; }
-    } // namespace agnostic
-
-    //
-    //
-    //
-    //
-    //
-
-    namespace glfw {
-
-        //
-        //
-        //
-        //
-        //
-
-        static void empty_mouse_press_callback(const coel::mouse::Press &) {}
-        static void (*s_mouse_press_callback)(const coel::mouse::Press &) = empty_mouse_press_callback;
-        static void empty_mouse_release_callback(const coel::mouse::Release &) {}
-        static void (*s_mouse_release_callback)(const coel::mouse::Release &) = empty_mouse_release_callback;
-        static void empty_mouse_scroll_callback(const coel::mouse::Scroll &) {}
-        static void (*s_mouse_scroll_callback)(const coel::mouse::Scroll &) = empty_mouse_scroll_callback;
-        static void empty_mouse_move_callback(const coel::mouse::Move &) {}
-        static void (*s_mouse_move_callback)(const coel::mouse::Move &) = empty_mouse_move_callback;
-        static void empty_key_press_callback(const coel::key::Press &) {}
-        static void (*s_key_press_callback)(const coel::key::Press &) = empty_key_press_callback;
-        static void empty_key_repeat_callback(const coel::key::Repeat &) {}
-        static void (*s_key_repeat_callback)(const coel::key::Repeat &) = empty_key_repeat_callback;
-        static void empty_key_release_callback(const coel::key::Release &) {}
-        static void (*s_key_release_callback)(const coel::key::Release &) = empty_key_release_callback;
-        static void empty_window_move_callback(const coel::window::Move &) {}
-        static void (*s_window_move_callback)(const coel::window::Move &) = empty_window_move_callback;
-        static void empty_window_resize_callback(const coel::window::Resize &) {}
-        static void (*s_window_resize_callback)(const coel::window::Resize &) = empty_window_resize_callback;
-        static void empty_window_close_callback(const coel::window::Close &) {}
-        static void (*s_window_close_callback)(const coel::window::Close &) = empty_window_close_callback;
-        static void empty_window_focus_callback(const coel::window::Focus &) {}
-        static void (*s_window_focus_callback)(const coel::window::Focus &) = empty_window_focus_callback;
-        static void empty_window_defocus_callback(const coel::window::Defocus &) {}
-        static void (*s_window_defocus_callback)(const coel::window::Defocus &) = empty_window_defocus_callback;
-        namespace callback { namespace set {
-            namespace mouse {
-            } // namespace mouse
-            namespace mouse {
-                void press(void (*const func)(const coel::mouse::Press &)) { s_mouse_press_callback = func; }
-                void release(void (*const func)(const coel::mouse::Release &)) { s_mouse_release_callback = func; }
-                void scroll(void (*const func)(const coel::mouse::Scroll &)) { s_mouse_scroll_callback = func; }
-                void move(void (*const func)(const coel::mouse::Move &)) { s_mouse_move_callback = func; }
-            } // namespace mouse
-            namespace key {
-                void press(void (*const func)(const coel::key::Press &)) { s_key_press_callback = func; }
-                void repeat(void (*const func)(const coel::key::Repeat &)) { s_key_repeat_callback = func; }
-                void release(void (*const func)(const coel::key::Release &)) { s_key_release_callback = func; }
-            } // namespace key
-            namespace window {
-                void move(void (*const func)(const coel::window::Move &)) { s_window_move_callback = func; }
-                void resize(void (*const func)(const coel::window::Resize &)) { s_window_resize_callback = func; }
-                void close(void (*const func)(const coel::window::Close &)) { s_window_close_callback = func; }
-                void focus(void (*const func)(const coel::window::Focus &)) { s_window_focus_callback = func; }
-                void defocus(void (*const func)(const coel::window::Defocus &)) { s_window_defocus_callback = func; }
-            } // namespace window
-        }}    // namespace callback::set
-
-        //
-        //
-        //
-        //
-        //
-
-        namespace create {
-            Window agnostic(const int width, const int height, const char *title) {
-                return {WindowAPI::GLFW, RendererAPI::Agnostic, nullptr, width, height};
-            }
-            Window vulkan(const int width, const int height, const char *title) {
-                return {WindowAPI::GLFW, RendererAPI::Vulkan, nullptr, width, height};
-            }
-            Window direct3d(const int width, const int height, const char *title) {
-                return {WindowAPI::GLFW, RendererAPI::Direct3D, nullptr, width, height};
-            }
-            Window opengl(const int width, const int height, const char *title) {
-                glfwInit();
-                GLFWwindow *result = glfwCreateWindow(width, height, title, nullptr, nullptr);
-                glfwMakeContextCurrent(result);
-                glfwSwapInterval(false);
-
-                // init opengl context
-                gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-                // set callbacks
-                glfwSetKeyCallback(result, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
-                    switch (action) {
-                    case GLFW_PRESS: s_key_press_callback({key, scancode, mods}); break;
-                    case GLFW_REPEAT: s_key_repeat_callback({key, scancode, mods}); break;
-                    case GLFW_RELEASE: s_key_release_callback({key, scancode, mods}); break;
-                    }
-                });
-                glfwSetMouseButtonCallback(result, [](GLFWwindow *w, int button, int action, int mods) {
-                    switch (action) {
-                    case GLFW_PRESS: s_mouse_press_callback({button, mods}); break;
-                    case GLFW_RELEASE: s_mouse_release_callback({button, mods}); break;
-                    }
-                });
-                glfwSetCursorPosCallback(result, [](GLFWwindow *w, double xPos, double yPos) {
-                    s_mouse_move_callback({xPos, yPos});
-                });
-                glfwSetScrollCallback(result, [](GLFWwindow *w, double xOffset, double yOffset) {
-                    s_mouse_scroll_callback({xOffset, yOffset});
-                });
-
-                glfwSetWindowPosCallback(result, [](GLFWwindow *w, int xPos, int yPos) {
-                    s_window_move_callback({xPos, yPos});
-                });
-                glfwSetWindowSizeCallback(result, [](GLFWwindow *w, int width, int height) {
-                    renderer::resize_viewport<RendererAPI::OpenGL>(width, height);
-                    s_window_resize_callback({width, height});
-                });
-                glfwSetWindowFocusCallback(result, [](GLFWwindow *w, int focus) {
-                    switch (focus) {
-                    case GLFW_TRUE: s_window_focus_callback({}); return;
-                    case GLFW_FALSE: s_window_defocus_callback({}); return;
-                    }
-                });
-                glfwSetWindowCloseCallback(result, [](GLFWwindow *w) { s_window_close_callback({}); });
-
-                return {WindowAPI::GLFW, RendererAPI::OpenGL, reinterpret_cast<void *>(result), width, height};
-            }
-        } // namespace create
-
-        //
-        //
-        //
-        //
-        //
-
-        namespace update {
-            bool agnostic(const Window *window) { return false; }
-            bool vulkan(const Window *window) { return false; }
-            bool direct3d(const Window *window) { return false; }
-            bool opengl(const Window *window) {
-                glfwPollEvents();
-                glfwSwapBuffers(reinterpret_cast<GLFWwindow *>(window->handle));
-                return !glfwWindowShouldClose(reinterpret_cast<GLFWwindow *>(window->handle));
-            }
-        } // namespace update
-
-        //
-        //
-        //
-        //
-        //
-
-        void set_cursor_pos(const Window *window, const float x, const float y) {
-            glfwSetCursorPos(reinterpret_cast<GLFWwindow *>(window->handle), x, y);
-        }
-
-        //
-        //
-        //
-        //
-        //
-
-        void set_cursor_visibility(const Window *window, const bool value) {
-            glfwSetInputMode(reinterpret_cast<GLFWwindow *>(window->handle), GLFW_CURSOR, GLFW_CURSOR_HIDDEN - value);
-        }
-
-        //
-        //
-        //
-        //
-        //
-
-        double get_time() { return glfwGetTime(); }
-    } // namespace glfw
-
-    //
-    //
-    //
-    //
-    //
-
-    namespace win32 {
-
-        //
-        //
-        //
-        //
-        //
-
-        namespace callback { namespace set {
-            namespace mouse {
-                void press(void (*const func)(const coel::mouse::Press &)) {}
-                void release(void (*const func)(const coel::mouse::Release &)) {}
-                void scroll(void (*const func)(const coel::mouse::Scroll &)) {}
-                void move(void (*const func)(const coel::mouse::Move &)) {}
-            } // namespace mouse
-
-            namespace key {
-                void press(void (*const func)(const coel::key::Press &)) {}
-                void repeat(void (*const func)(const coel::key::Repeat &)) {}
-                void release(void (*const func)(const coel::key::Release &)) {}
-            } // namespace key
-
-            namespace window {
-                void move(void (*const func)(const coel::window::Move &)) {}
-                void resize(void (*const func)(const coel::window::Resize &)) {}
-                void close(void (*const func)(const coel::window::Close &)) {}
-                void focus(void (*const func)(const coel::window::Focus &)) {}
-                void defocus(void (*const func)(const coel::window::Defocus &)) {}
-            } // namespace window
-        }}    // namespace callback::set
-
-        //
-        //
-        //
-        //
-        //
-
-        namespace create {
-            Window agnostic(const int width, const int height, const char *title) {
-                return {WindowAPI::Win32, RendererAPI::Agnostic, nullptr, width, height};
-            }
-            Window vulkan(const int width, const int height, const char *title) {
-                return {WindowAPI::Win32, RendererAPI::Vulkan, nullptr, width, height};
-            }
-            Window direct3d(const int width, const int height, const char *title) {
-                return {WindowAPI::Win32, RendererAPI::Direct3D, nullptr, width, height};
-            }
-            Window opengl(const int width, const int height, const char *title) {
-                return {WindowAPI::Win32, RendererAPI::OpenGL, nullptr, width, height};
-            }
-        } // namespace create
-
-        //
-        //
-        //
-        //
-        //
-
-        namespace update {
-            bool agnostic(const Window *window) { return false; }
-            bool vulkan(const Window *window) { return false; }
-            bool direct3d(const Window *window) { return false; }
-            bool opengl(const Window *window) { return false; }
-        } // namespace update
-
-        //
-        //
-        //
-        //
-        //
-
-        void set_cursor_pos(const Window *window, const float x, const float y) {}
-
-        //
-        //
-        //
-        //
-        //
-
-        void set_cursor_visibility(const Window *window, const bool value) {}
-
-        //
-        //
-        //
-        //
-        //
-
-        double get_time() { return 0.0; }
-    } // namespace win32
-}}}   // namespace coel::window::_internal
+        glUseProgram(shaderProgram);
+    }
+    Texture::Texture(const char *const filepath) : filepath(filepath) {}
+    Model::Model(const char *const filepath) {}
+    Model::Model(const float *pos_data, const unsigned short *ind_data) {}
+    Material::Material(const Shader *const shader, const Texture textures[32]) : shader(shader), textures(textures) {}
+    Renderable::Renderable(const Model *const model, const Material *const material) : model(model), material(material) {}
+    namespace renderer {
+        void clear(unsigned int color) {}
+        void submit(const Renderable *const r) {}
+        void flush() {}
+    } // namespace renderer
+} // namespace coel
