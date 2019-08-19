@@ -4,3 +4,9 @@
 [submodule "glad"]
 	path = glad
 	url = https://github.com/GabeRundlett/glad
+[submodule "math"]
+	path = math
+	url = https://github.com/GabeRundlett/math
+[submodule "stb"]
+	path = stb
+	url = https://github.com/GabeRundlett/stb
