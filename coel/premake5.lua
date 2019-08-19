@@ -4,9 +4,9 @@ project "coel"
 	targetdir("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/build/bin/intermediates/" .. outputdir .. "/%{prj.name}")
 	files { "src/**.hpp", "src/**.cpp" }
-	includedirs { "%{include_dir.glad}", "%{include_dir.glfw}", "%{include_dir.stb_image}" }
+	includedirs { "%{include_dir.glad}", "%{include_dir.glfw}", "%{include_dir.stb}"}
 	defines { "GLFW_INCLUDE_NONE" }
-	links { "glad", "glfw" }
+	links { "glad", "glfw", "stb" }
 	warnings "Extra"
 	filter "configurations:Debug"
 		defines "_CONFIG_DEBUG"

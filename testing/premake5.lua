@@ -4,8 +4,8 @@ project "testing"
 	targetdir("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/build/bin/intermediates/" .. outputdir .. "/%{prj.name}")
 	files { "src/**.hpp", "src/**.cpp" }
-	includedirs { "%{include_dir.coel}" }
-	links { "coel" }
+	includedirs { "%{include_dir.coel}", "%{include_dir.math}" }
+	links { "coel", "math" }
 	warnings "Extra"
 	filter "configurations:Debug"
 		defines "_CONFIG_DEBUG"

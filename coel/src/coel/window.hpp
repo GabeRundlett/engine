@@ -8,9 +8,7 @@ namespace coel {
     struct KeyRelease {
         int key, scancode, mods;
     };
-} // namespace coel
 
-namespace coel {
     struct MousePress {
         int button, mods;
     };
@@ -23,9 +21,7 @@ namespace coel {
     struct MouseMove {
         double x, y;
     };
-} // namespace coel
 
-namespace coel {
     struct WindowMove {
         int x, y;
     };
@@ -35,9 +31,7 @@ namespace coel {
     struct WindowClose {};
     struct WindowFocus {};
     struct WindowDefocus {};
-} // namespace coel
 
-namespace coel {
     enum class KeyCode : const unsigned short {
         Space = 32,
         Apostrophe = 39,
@@ -189,6 +183,10 @@ namespace coel {
 } // namespace coel
 
 namespace coel {
+    enum class LayoutType { Float, Int, UInt, Short, UShort, Byte, UByte };
+} // namespace coel
+
+namespace coel {
     struct Window {
         unsigned int width, height;
         const char *const title;
@@ -209,19 +207,28 @@ namespace coel {
         virtual void window_defocus(const WindowDefocus &e) {}
     };
     struct Shader {
+        unsigned int id;
         const char *const vert_src, *const frag_src;
         Shader(const char *const vert_src, const char *const frag_src);
     };
     struct Texture {
-        unsigned int width, height;
+        unsigned int id;
+        int width, height, channels;
         const char *const filepath;
         Texture(const char *const filepath);
     };
+    template <int N> struct Layout {
+        unsigned int stride;
+        LayoutType types[N];
+        unsigned int counts[N];
+        unsigned int offsets[N];
+    };
     struct Model {
-        const float *pos_data;
-        const unsigned short *ind_data;
+        const void *vdata;
+        const unsigned short *idata;
+        const unsigned int vsize, isize;
         Model(const char *const filepath);
-        Model(const float *pos_data, const unsigned short *ind_data);
+        Model(const void *vdata, const unsigned int vsize, const unsigned short *idata, const unsigned int isize);
     };
     struct Material {
         const Shader *const shader;
@@ -234,8 +241,30 @@ namespace coel {
         Renderable(const Model *const model, const Material *const material);
     };
     namespace renderer {
-        void clear(unsigned int color);
+        namespace _internal {
+            void setup_layout(const LayoutType type, const unsigned int count);
+            template <typename... T>
+            static inline void setup_layout(const LayoutType type, const unsigned int count, T... param) {
+                setup_layout(type, count);
+                setup_layout(param...);
+            }
+            void set_layout(const unsigned int i, const LayoutType type, const unsigned int count);
+            template <typename... T>
+            static inline void set_layout(const unsigned int i, const LayoutType type, const unsigned int count, T... param) {
+                set_layout(i, type, count);
+                set_layout(i + 1, param...);
+            }
+        } // namespace _internal
+        template <typename... T> static inline void layout(const LayoutType type, const unsigned int count, T... param) {
+            _internal::setup_layout(type, count, param...);
+            _internal::set_layout(0, type, count, param...);
+        }
+        void clear(const unsigned int color);
+        void clear(const float r, const float g, const float b, const float a = 1.f);
+        inline void clear(const float val = 0.25) { clear(val, val, val); }
         void submit(const Renderable *const r);
         void flush();
+        void viewport(const float width, const float height);
     } // namespace renderer
+    // namespace renderer
 } // namespace coel
