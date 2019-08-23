@@ -12,7 +12,7 @@ namespace coel {
     static unsigned int s_vao_id, s_vbo_id, s_ibo_id;
     static unsigned char *s_vbuffer_pointer;
     static unsigned short *s_ibuffer_pointer;
-    static unsigned int s_index_count = 0;
+    static unsigned int s_vertex_count = 0, s_index_count = 0, s_texture_count = 0;
 
     Window::Window(const unsigned int width, const unsigned int height, const char *const title)
         : width(width), height(height), title(title) {
@@ -95,6 +95,7 @@ namespace coel {
         glfwSwapBuffers(window);
         return !glfwWindowShouldClose(window);
     }
+    float Window::get_time() { return glfwGetTime(); }
     Shader::Shader(const char *const vert_src, const char *const frag_src) : vert_src(vert_src), frag_src(frag_src) {
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vert_src, NULL);
@@ -114,6 +115,7 @@ namespace coel {
 
         glUseProgram(id);
     }
+    void Shader::send_int(const char *const name, const int value) const { glUniform1i(glGetUniformLocation(id, name), value); }
     Texture::Texture(const char *const filepath) : filepath(filepath) {
         stbi_set_flip_vertically_on_load(true);
         unsigned char *data = stbi_load(filepath, &width, &height, &channels, 0);
@@ -121,18 +123,28 @@ namespace coel {
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D, id);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        switch (channels) {
+        case 3: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+        case 4: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); break;
+        default: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); break;
+        }
         glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(data);
+        ++s_texture_count;
     }
     Model::Model(const char *const filepath) : vdata(nullptr), idata(nullptr), vsize(0), isize(0) {}
     Model::Model(const void *vdata, const unsigned int vsize, const unsigned short *idata, const unsigned int isize)
         : vdata(vdata), idata(idata), vsize(vsize), isize(isize) {}
-    Material::Material(const Shader *const shader, const Texture textures[32]) : shader(shader), textures(textures) {}
+    void Material::init_tex_mat(const Shader *const shader, const unsigned int slot, const Texture *texture,
+                                const char *const name) {
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_2D, texture->id);
+        shader->send_int(name, slot);
+    }
     Renderable::Renderable(const Model *const model, const Material *const material) : model(model), material(material) {}
     namespace renderer {
         namespace _internal {
@@ -201,16 +213,17 @@ namespace coel {
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
         }
-        void submit(const Renderable *const r) {
-            const unsigned int vsize = r->model->vsize, isize = r->model->isize;
-            const unsigned char *vdata = reinterpret_cast<const unsigned char *>(r->model->vdata);
-            const unsigned short *idata = r->model->idata;
+        void submit(const Model *const model) {
+            const unsigned int vsize = model->vsize, isize = model->isize;
+            const unsigned char *vdata = reinterpret_cast<const unsigned char *>(model->vdata);
+            const unsigned short *idata = model->idata;
             for (unsigned int i = 0; i < vsize; ++i)
                 s_vbuffer_pointer[i] = vdata[i];
             s_vbuffer_pointer += vsize;
             const unsigned short index_count = isize / sizeof(unsigned short);
             for (unsigned int i = 0; i < index_count; ++i)
-                s_ibuffer_pointer[i] = idata[i];
+                s_ibuffer_pointer[i] = idata[i] + s_vertex_count;
+            s_vertex_count += vsize / _internal::s_layout_stride;
             s_ibuffer_pointer += index_count;
             s_index_count += index_count;
         }
@@ -221,6 +234,7 @@ namespace coel {
             glDrawElements(GL_TRIANGLES, s_index_count, GL_UNSIGNED_SHORT, nullptr);
             s_vbuffer_pointer = reinterpret_cast<unsigned char *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
             s_ibuffer_pointer = reinterpret_cast<unsigned short *>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY));
+            s_vertex_count = 0;
             s_index_count = 0;
         }
         void viewport(const float width, const float height) { glViewport(0, 0, width, height); }

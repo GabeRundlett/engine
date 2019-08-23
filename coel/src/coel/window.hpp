@@ -193,6 +193,7 @@ namespace coel {
         void *window_handle;
         Window(const unsigned int width, const unsigned int height, const char *const title);
         const bool update();
+        float get_time();
         virtual void key_press(const KeyPress &e) {}
         virtual void key_repeat(const KeyRepeat &e) {}
         virtual void key_release(const KeyRelease &e) {}
@@ -210,6 +211,7 @@ namespace coel {
         unsigned int id;
         const char *const vert_src, *const frag_src;
         Shader(const char *const vert_src, const char *const frag_src);
+        void send_int(const char *const name, const int value) const;
     };
     struct Texture {
         unsigned int id;
@@ -232,8 +234,21 @@ namespace coel {
     };
     struct Material {
         const Shader *const shader;
-        const Texture *const textures;
-        Material(const Shader *const shader, const Texture textures[32]);
+
+        Material() : shader(nullptr){};
+        template <typename... T> Material(const Shader *const shader, T... texture_shader_data) : shader(shader) {
+            init_tex_mat(shader, 0, texture_shader_data...);
+        }
+
+      private:
+        static void init_tex_mat(const Shader *const shader, const unsigned int slot, const Texture *texture,
+                                 const char *const name);
+        template <typename... T>
+        inline static void init_tex_mat(const Shader *const shader, const unsigned int slot, const Texture *texture,
+                                        const char *const name, T... texture_shader_data) {
+            init_tex_mat(shader, slot, texture, name);
+            init_tex_mat(shader, slot + 1, texture_shader_data...);
+        }
     };
     struct Renderable {
         const Model *const model;
@@ -262,7 +277,7 @@ namespace coel {
         void clear(const unsigned int color);
         void clear(const float r, const float g, const float b, const float a = 1.f);
         inline void clear(const float val = 0.25) { clear(val, val, val); }
-        void submit(const Renderable *const r);
+        void submit(const Model *const r);
         void flush();
         void viewport(const float width, const float height);
     } // namespace renderer
