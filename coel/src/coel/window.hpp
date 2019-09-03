@@ -32,7 +32,7 @@ namespace coel {
     struct WindowFocus {};
     struct WindowDefocus {};
 
-    enum class KeyCode : const unsigned short {
+    enum KeyCode : const unsigned short {
         Space = 32,
         Apostrophe = 39,
         Comma = 44,
@@ -192,7 +192,9 @@ namespace coel {
         const char *const title;
         void *window_handle;
         Window(const unsigned int width, const unsigned int height, const char *const title);
-        const bool update();
+        void update();
+        void make_current();
+        bool should_close();
         float get_time();
         virtual void key_press(const KeyPress &e) {}
         virtual void key_repeat(const KeyRepeat &e) {}
@@ -212,18 +214,16 @@ namespace coel {
         const char *const vert_src, *const frag_src;
         Shader(const char *const vert_src, const char *const frag_src);
         void send_int(const char *const name, const int value) const;
+        void send_float(const char *const name, const float value) const;
+        void send_float2(const char *const name, const float *const data) const;
+        void send_float3(const char *const name, const float *const data) const;
+        void send_float4(const char *const name, const float *const data) const;
     };
     struct Texture {
         unsigned int id;
         int width, height, channels;
         const char *const filepath;
         Texture(const char *const filepath);
-    };
-    template <int N> struct Layout {
-        unsigned int stride;
-        LayoutType types[N];
-        unsigned int counts[N];
-        unsigned int offsets[N];
     };
     struct Model {
         const void *vdata;
@@ -234,7 +234,6 @@ namespace coel {
     };
     struct Material {
         const Shader *const shader;
-
         Material() : shader(nullptr){};
         template <typename... T> Material(const Shader *const shader, T... texture_shader_data) : shader(shader) {
             init_tex_mat(shader, 0, texture_shader_data...);
@@ -250,36 +249,49 @@ namespace coel {
             init_tex_mat(shader, slot + 1, texture_shader_data...);
         }
     };
-    struct Renderable {
-        const Model *const model;
-        const Material *const material;
-        Renderable(const Model *const model, const Material *const material);
-    };
     namespace renderer {
-        namespace _internal {
+        void clear(const unsigned int color);
+        void clear(const float r, const float g, const float b, const float a = 1.f);
+        static inline void clear(const float val = 0.25) { clear(val, val, val, 1.f); }
+        void viewport(const float width, const float height);
+        namespace batch2d {
+            struct Vertex {
+                float pos_x, pos_y, tex_u, tex_v;
+                unsigned char col_r, col_g, col_b, col_a;
+                float tid;
+            };
+            void init();
+            void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y,
+                             const float tid = -1.f);
+            void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y,
+                             const unsigned char col[4]);
+            void flush();
+        } // namespace batch2d
+        namespace batch3d {
+            void init();
+            void submit(const Model *const model);
+            void flush();
+        } // namespace batch3d
+        namespace custom {
+            void init();
+            void submit(const Model *const model);
+            void flush();
             void setup_layout(const LayoutType type, const unsigned int count);
-            template <typename... T>
-            static inline void setup_layout(const LayoutType type, const unsigned int count, T... param) {
+            template <typename... P>
+            static inline void setup_layout(const LayoutType type, const unsigned int count, P... param) {
                 setup_layout(type, count);
                 setup_layout(param...);
             }
             void set_layout(const unsigned int i, const LayoutType type, const unsigned int count);
-            template <typename... T>
-            static inline void set_layout(const unsigned int i, const LayoutType type, const unsigned int count, T... param) {
+            template <typename... P>
+            static inline void set_layout(const unsigned int i, const LayoutType type, const unsigned int count, P... param) {
                 set_layout(i, type, count);
                 set_layout(i + 1, param...);
             }
-        } // namespace _internal
-        template <typename... T> static inline void layout(const LayoutType type, const unsigned int count, T... param) {
-            _internal::setup_layout(type, count, param...);
-            _internal::set_layout(0, type, count, param...);
-        }
-        void clear(const unsigned int color);
-        void clear(const float r, const float g, const float b, const float a = 1.f);
-        inline void clear(const float val = 0.25) { clear(val, val, val); }
-        void submit(const Model *const r);
-        void flush();
-        void viewport(const float width, const float height);
-    } // namespace renderer
-    // namespace renderer
+            template <typename... P> static inline void layout(const LayoutType type, const unsigned int count, P... param) {
+                renderer::custom::setup_layout(type, count, param...);
+                renderer::custom::set_layout(0, type, count, param...);
+            }
+        } // namespace custom
+    }     // namespace renderer
 } // namespace coel

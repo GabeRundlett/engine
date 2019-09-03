@@ -7,12 +7,7 @@
 #include <iostream>
 
 namespace coel {
-    static constexpr unsigned int s_vbuffer_size = 4096, s_ibuffer_size = 4096;
-
-    static unsigned int s_vao_id, s_vbo_id, s_ibo_id;
-    static unsigned char *s_vbuffer_pointer;
-    static unsigned short *s_ibuffer_pointer;
-    static unsigned int s_vertex_count = 0, s_index_count = 0, s_texture_count = 0;
+    static unsigned int s_texture_count = 0;
 
     Window::Window(const unsigned int width, const unsigned int height, const char *const title)
         : width(width), height(height), title(title) {
@@ -24,11 +19,6 @@ namespace coel {
         // window manager prop
         glfwSwapInterval(false);
         glfwSetWindowUserPointer(result, this);
-        // init opengl context
-        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        // opengl prop
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // set window callbacks
         glfwSetKeyCallback(result, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
@@ -74,27 +64,19 @@ namespace coel {
             window->window_close({});
         });
 
-        // init renderer
-        glGenVertexArrays(1, &s_vao_id);
-        glBindVertexArray(s_vao_id);
-
-        glGenBuffers(1, &s_vbo_id);
-        glBindBuffer(GL_ARRAY_BUFFER, s_vbo_id);
-        glBufferData(GL_ARRAY_BUFFER, s_vbuffer_size, nullptr, GL_DYNAMIC_DRAW);
-
-        glGenBuffers(1, &s_ibo_id);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_ibo_id);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_ibuffer_size, nullptr, GL_DYNAMIC_DRAW);
-
-        s_vbuffer_pointer = reinterpret_cast<unsigned char *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-        s_ibuffer_pointer = reinterpret_cast<unsigned short *>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY));
+        // init opengl context
+        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        // opengl prop
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
-    const bool Window::update() {
+    void Window::update() {
         GLFWwindow *window = reinterpret_cast<GLFWwindow *>(window_handle);
         glfwPollEvents();
         glfwSwapBuffers(window);
-        return !glfwWindowShouldClose(window);
     }
+    void Window::make_current() { glfwMakeContextCurrent(reinterpret_cast<GLFWwindow *>(window_handle)); }
+    bool Window::should_close() { return glfwWindowShouldClose(reinterpret_cast<GLFWwindow *>(window_handle)); }
     float Window::get_time() { return glfwGetTime(); }
     Shader::Shader(const char *const vert_src, const char *const frag_src) : vert_src(vert_src), frag_src(frag_src) {
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -116,6 +98,18 @@ namespace coel {
         glUseProgram(id);
     }
     void Shader::send_int(const char *const name, const int value) const { glUniform1i(glGetUniformLocation(id, name), value); }
+    void Shader::send_float(const char *const name, const float value) const {
+        glUniform1f(glGetUniformLocation(id, name), value);
+    }
+    void Shader::send_float2(const char *const name, const float *const data) const {
+        glUniform2fv(glGetUniformLocation(id, name), 1, data);
+    }
+    void Shader::send_float3(const char *const name, const float *const data) const {
+        glUniform3fv(glGetUniformLocation(id, name), 1, data);
+    }
+    void Shader::send_float4(const char *const name, const float *const data) const {
+        glUniform4fv(glGetUniformLocation(id, name), 1, data);
+    }
     Texture::Texture(const char *const filepath) : filepath(filepath) {
         stbi_set_flip_vertically_on_load(true);
         unsigned char *data = stbi_load(filepath, &width, &height, &channels, 0);
@@ -145,11 +139,208 @@ namespace coel {
         glBindTexture(GL_TEXTURE_2D, texture->id);
         shader->send_int(name, slot);
     }
-    Renderable::Renderable(const Model *const model, const Material *const material) : model(model), material(material) {}
     namespace renderer {
-        namespace _internal {
+        void clear(const unsigned int color) {
+            const float fac = 1.f / 255;
+            const float r = static_cast<const unsigned char>(color >> 24);
+            const float g = static_cast<const unsigned char>(color >> 16);
+            const float b = static_cast<const unsigned char>(color >> 8);
+            const float a = static_cast<const unsigned char>(color);
+            glClearColor(r * fac, g * fac, b * fac, a * fac);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        void clear(const float r, const float g, const float b, const float a) {
+            glClearColor(r, g, b, a);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        void viewport(const float width, const float height) { glViewport(0, 0, width, height); }
+        namespace batch2d {
+            static constexpr unsigned int s_sprite_count = 10000, s_vbuffer_size = 4 * sizeof(Vertex) * s_sprite_count,
+                                          s_ibuffer_size = 6 * s_sprite_count;
+            static unsigned int s_vao_id, s_vbo_id, s_ibo_id;
+            static unsigned short s_indices[s_ibuffer_size];
+            static unsigned int s_index_count = 0;
+            static Vertex *s_vbuffer_pointer;
+            void init() {
+                glGenVertexArrays(1, &s_vao_id);
+                glBindVertexArray(s_vao_id);
+
+                glGenBuffers(1, &s_vbo_id);
+                glBindBuffer(GL_ARRAY_BUFFER, s_vbo_id);
+                glBufferData(GL_ARRAY_BUFFER, s_vbuffer_size, nullptr, GL_DYNAMIC_DRAW);
+
+                glEnableVertexAttribArray(0);
+                glEnableVertexAttribArray(1);
+                glEnableVertexAttribArray(2);
+                glEnableVertexAttribArray(3);
+                glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)0);
+                glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)8);
+                glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Vertex), (const void *)16);
+                glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)20);
+
+                for (unsigned int i = 0; i < s_sprite_count; ++i) {
+                    const unsigned int index = i * 6, offset = i * 4;
+                    s_indices[index] = offset;
+                    s_indices[index + 1] = 1 + offset;
+                    s_indices[index + 2] = 2 + offset;
+                    s_indices[index + 3] = 1 + offset;
+                    s_indices[index + 4] = 3 + offset;
+                    s_indices[index + 5] = 2 + offset;
+                }
+
+                glGenBuffers(1, &s_ibo_id);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_ibo_id);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(s_indices), s_indices, GL_STATIC_DRAW);
+
+                s_vbuffer_pointer = reinterpret_cast<Vertex *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+            }
+            void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const float tid) {
+                s_vbuffer_pointer->pos_x = pos_x;
+                s_vbuffer_pointer->pos_y = pos_y;
+                s_vbuffer_pointer->tex_u = 0.f;
+                s_vbuffer_pointer->tex_v = 0.f;
+                s_vbuffer_pointer->tid = tid;
+                s_vbuffer_pointer->col_r = 156;
+                s_vbuffer_pointer->col_g = 102;
+                s_vbuffer_pointer->col_b = 255;
+                s_vbuffer_pointer->col_a = 255;
+                ++s_vbuffer_pointer;
+                s_vbuffer_pointer->pos_x = pos_x;
+                s_vbuffer_pointer->pos_y = pos_y + size_y;
+                s_vbuffer_pointer->tex_u = 0.f;
+                s_vbuffer_pointer->tex_v = 1.f;
+                s_vbuffer_pointer->tid = tid;
+                s_vbuffer_pointer->col_r = 156;
+                s_vbuffer_pointer->col_g = 102;
+                s_vbuffer_pointer->col_b = 255;
+                s_vbuffer_pointer->col_a = 255;
+                ++s_vbuffer_pointer;
+                s_vbuffer_pointer->pos_x = pos_x + size_x;
+                s_vbuffer_pointer->pos_y = pos_y;
+                s_vbuffer_pointer->tex_u = 1.f;
+                s_vbuffer_pointer->tex_v = 0.f;
+                s_vbuffer_pointer->tid = tid;
+                s_vbuffer_pointer->col_r = 156;
+                s_vbuffer_pointer->col_g = 102;
+                s_vbuffer_pointer->col_b = 255;
+                s_vbuffer_pointer->col_a = 255;
+                ++s_vbuffer_pointer;
+                s_vbuffer_pointer->pos_x = pos_x + size_x;
+                s_vbuffer_pointer->pos_y = pos_y + size_y;
+                s_vbuffer_pointer->tex_u = 1.f;
+                s_vbuffer_pointer->tex_v = 1.f;
+                s_vbuffer_pointer->tid = tid;
+                s_vbuffer_pointer->col_r = 156;
+                s_vbuffer_pointer->col_g = 102;
+                s_vbuffer_pointer->col_b = 255;
+                s_vbuffer_pointer->col_a = 255;
+                ++s_vbuffer_pointer;
+                s_index_count += 6;
+            }
+            void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y,
+                             const unsigned char *const col) {
+                s_vbuffer_pointer->pos_x = pos_x;
+                s_vbuffer_pointer->pos_y = pos_y;
+                s_vbuffer_pointer->tex_u = 0.f;
+                s_vbuffer_pointer->tex_v = 0.f;
+                s_vbuffer_pointer->tid = -1;
+                s_vbuffer_pointer->col_r = col[0];
+                s_vbuffer_pointer->col_g = col[1];
+                s_vbuffer_pointer->col_b = col[2];
+                s_vbuffer_pointer->col_a = col[3];
+                ++s_vbuffer_pointer;
+                s_vbuffer_pointer->pos_x = pos_x;
+                s_vbuffer_pointer->pos_y = pos_y + size_y;
+                s_vbuffer_pointer->tex_u = 0.f;
+                s_vbuffer_pointer->tex_v = 1.f;
+                s_vbuffer_pointer->tid = -1;
+                s_vbuffer_pointer->col_r = col[0];
+                s_vbuffer_pointer->col_g = col[1];
+                s_vbuffer_pointer->col_b = col[2];
+                s_vbuffer_pointer->col_a = col[3];
+                ++s_vbuffer_pointer;
+                s_vbuffer_pointer->pos_x = pos_x + size_x;
+                s_vbuffer_pointer->pos_y = pos_y;
+                s_vbuffer_pointer->tex_u = 1.f;
+                s_vbuffer_pointer->tex_v = 0.f;
+                s_vbuffer_pointer->tid = -1;
+                s_vbuffer_pointer->col_r = col[0];
+                s_vbuffer_pointer->col_g = col[1];
+                s_vbuffer_pointer->col_b = col[2];
+                s_vbuffer_pointer->col_a = col[3];
+                ++s_vbuffer_pointer;
+                s_vbuffer_pointer->pos_x = pos_x + size_x;
+                s_vbuffer_pointer->pos_y = pos_y + size_y;
+                s_vbuffer_pointer->tex_u = 1.f;
+                s_vbuffer_pointer->tex_v = 1.f;
+                s_vbuffer_pointer->tid = -1;
+                s_vbuffer_pointer->col_r = col[0];
+                s_vbuffer_pointer->col_g = col[1];
+                s_vbuffer_pointer->col_b = col[2];
+                s_vbuffer_pointer->col_a = col[3];
+                ++s_vbuffer_pointer;
+                s_index_count += 6;
+            }
+            void flush() {
+                glUnmapBuffer(GL_ARRAY_BUFFER);
+                glBindVertexArray(s_vao_id);
+                glDrawElements(GL_TRIANGLES, s_index_count, GL_UNSIGNED_SHORT, nullptr);
+                s_vbuffer_pointer = reinterpret_cast<Vertex *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+                s_index_count = 0;
+            }
+        } // namespace batch2d
+        namespace batch3d {
+            void init() {}
+            void submit(const Model *const model) {}
+            void flush() {}
+        } // namespace batch3d
+        namespace custom {
+            static constexpr unsigned int s_vbuffer_size = 4096, s_ibuffer_size = 4096;
+            static unsigned int s_vao_id, s_vbo_id, s_ibo_id;
+            static unsigned char *s_vbuffer_pointer;
+            static unsigned short *s_ibuffer_pointer;
+            static unsigned int s_vertex_count = 0, s_index_count = 0;
             static unsigned short s_layout_count = 0, s_layout_stride = 0;
             static unsigned char *s_layout_begin = 0;
+            void init() {
+                glGenVertexArrays(1, &s_vao_id);
+                glBindVertexArray(s_vao_id);
+
+                glGenBuffers(1, &s_vbo_id);
+                glBindBuffer(GL_ARRAY_BUFFER, s_vbo_id);
+                glBufferData(GL_ARRAY_BUFFER, s_vbuffer_size, nullptr, GL_DYNAMIC_DRAW);
+
+                glGenBuffers(1, &s_ibo_id);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_ibo_id);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_ibuffer_size, nullptr, GL_DYNAMIC_DRAW);
+
+                s_vbuffer_pointer = reinterpret_cast<unsigned char *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+                s_ibuffer_pointer = reinterpret_cast<unsigned short *>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY));
+            }
+            void submit(const Model *const model) {
+                const unsigned int vsize = model->vsize, isize = model->isize;
+                const unsigned char *vdata = reinterpret_cast<const unsigned char *>(model->vdata);
+                const unsigned short *idata = model->idata;
+                for (unsigned int i = 0; i < vsize; ++i)
+                    s_vbuffer_pointer[i] = vdata[i];
+                s_vbuffer_pointer += vsize;
+                const unsigned short index_count = isize / sizeof(unsigned short);
+                for (unsigned int i = 0; i < index_count; ++i)
+                    s_ibuffer_pointer[i] = idata[i] + s_vertex_count;
+                s_vertex_count += vsize / s_layout_stride;
+                s_ibuffer_pointer += index_count;
+                s_index_count += index_count;
+            }
+            void flush() {
+                glUnmapBuffer(GL_ARRAY_BUFFER);
+                glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+                glBindVertexArray(s_vao_id);
+                glDrawElements(GL_TRIANGLES, s_index_count, GL_UNSIGNED_SHORT, nullptr);
+                s_vbuffer_pointer = reinterpret_cast<unsigned char *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+                s_ibuffer_pointer = reinterpret_cast<unsigned short *>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY));
+                s_vertex_count = 0;
+                s_index_count = 0;
+            }
             void setup_layout(const LayoutType type, const unsigned int count) {
                 ++s_layout_count;
                 switch (type) {
@@ -199,44 +390,6 @@ namespace coel {
                 default: break; // Invalid layout type
                 }
             }
-        } // namespace _internal
-        void clear(const unsigned int color) {
-            const float fac = 1.f / 255;
-            const float r = static_cast<const unsigned char>(color >> 24);
-            const float g = static_cast<const unsigned char>(color >> 16);
-            const float b = static_cast<const unsigned char>(color >> 8);
-            const float a = static_cast<const unsigned char>(color);
-            glClearColor(r * fac, g * fac, b * fac, a * fac);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-        void clear(const float r, const float g, const float b, const float a) {
-            glClearColor(r, g, b, a);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-        void submit(const Model *const model) {
-            const unsigned int vsize = model->vsize, isize = model->isize;
-            const unsigned char *vdata = reinterpret_cast<const unsigned char *>(model->vdata);
-            const unsigned short *idata = model->idata;
-            for (unsigned int i = 0; i < vsize; ++i)
-                s_vbuffer_pointer[i] = vdata[i];
-            s_vbuffer_pointer += vsize;
-            const unsigned short index_count = isize / sizeof(unsigned short);
-            for (unsigned int i = 0; i < index_count; ++i)
-                s_ibuffer_pointer[i] = idata[i] + s_vertex_count;
-            s_vertex_count += vsize / _internal::s_layout_stride;
-            s_ibuffer_pointer += index_count;
-            s_index_count += index_count;
-        }
-        void flush() {
-            glUnmapBuffer(GL_ARRAY_BUFFER);
-            glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-            glBindVertexArray(s_vao_id);
-            glDrawElements(GL_TRIANGLES, s_index_count, GL_UNSIGNED_SHORT, nullptr);
-            s_vbuffer_pointer = reinterpret_cast<unsigned char *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-            s_ibuffer_pointer = reinterpret_cast<unsigned short *>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY));
-            s_vertex_count = 0;
-            s_index_count = 0;
-        }
-        void viewport(const float width, const float height) { glViewport(0, 0, width, height); }
-    } // namespace renderer
+        } // namespace custom
+    }     // namespace renderer
 } // namespace coel
