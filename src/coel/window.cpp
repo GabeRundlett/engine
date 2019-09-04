@@ -8,7 +8,6 @@
 
 namespace coel {
     static unsigned int s_texture_count = 0;
-
     Window::Window(const unsigned int width, const unsigned int height, const char *const title)
         : width(width), height(height), title(title) {
         // init window manager
@@ -112,6 +111,7 @@ namespace coel {
     }
     Texture::Texture(const char *const filepath) : filepath(filepath) {
         stbi_set_flip_vertically_on_load(true);
+        int channels;
         unsigned char *data = stbi_load(filepath, &width, &height, &channels, 0);
 
         glGenTextures(1, &id);
@@ -129,6 +129,32 @@ namespace coel {
 
         stbi_image_free(data);
         ++s_texture_count;
+    }
+    Texture::Texture(const int width, const int height, ColorSpace space)
+        : width(width), height(height), color_space(space), filepath(nullptr) {
+        glGenTextures(1, &id);
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        switch (color_space) {
+        case ColorSpace::RGB:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+            break;
+        case ColorSpace::RGBA:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            break;
+        default: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr); break;
+        }
+    }
+    void Texture::update(const void *const data) {
+        glBindTexture(GL_TEXTURE_2D, id);
+        switch (color_space) {
+        case ColorSpace::RGB: glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+        case ColorSpace::RGBA: glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); break;
+        default: glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); break;
+        }
     }
     Model::Model(const char *const filepath) : vdata(nullptr), idata(nullptr), vsize(0), isize(0) {}
     Model::Model(const void *vdata, const unsigned int vsize, const unsigned short *idata, const unsigned int isize)

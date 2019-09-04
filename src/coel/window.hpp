@@ -183,7 +183,8 @@ namespace coel {
 } // namespace coel
 
 namespace coel {
-    enum class LayoutType { Float, Int, UInt, Short, UShort, Byte, UByte };
+    enum class LayoutType : const unsigned char { Float, Int, UInt, Short, UShort, Byte, UByte };
+    enum class ColorSpace : const unsigned char { RGB, RGBA };
 } // namespace coel
 
 namespace coel {
@@ -221,9 +222,12 @@ namespace coel {
     };
     struct Texture {
         unsigned int id;
-        int width, height, channels;
+        int width, height;
+        ColorSpace color_space;
         const char *const filepath;
         Texture(const char *const filepath);
+        Texture(const int width, const int height, ColorSpace space);
+        void update(const void *const data);
     };
     struct Model {
         const void *vdata;

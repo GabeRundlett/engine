@@ -33,5 +33,6 @@ project "engine"
 		defines "_CONFIG_PLATFORM_WINDOWS"
 	filter "system:linux"
 		defines "_CONFIG_PLATFORM_LINUX"
+        links { "X11", "dl", "pthread" }
 	filter "system:macosx"
 		defines "_CONFIG_PLATFORM_MACOS"
