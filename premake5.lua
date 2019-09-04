@@ -1,26 +1,37 @@
-workspace "engine"
-	architecture "x64"
-	configurations { "Debug", "DebugOptimized", "Release" }
-	
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-include_dir = {}
-include_dir["coel"] = "%{wks.location}/coel/src"
-include_dir["glad"] = "%{wks.location}/glad/include"
-include_dir["glfw"] = "%{wks.location}/glfw/include"
-include_dir["stb"] = "%{wks.location}/stb/src"
-include_dir["math"] = "%{wks.location}/math/src"
+include "dep/glad"
+include "dep/glfw"
+include "dep/stb"
 
-startproject "test"
-
-include "coel"
-include "glad"
-include "glfw"
-include "stb"
-include "math"
-include "test"
-
-flags { "MultiProcessorCompile" }
-filter "configurations:DebugOptimized"
-	flags { "LinkTimeOptimization" }
-filter "configurations:Release"
-	flags { "LinkTimeOptimization" }
+project "coel"
+	kind "StaticLib"
+	language "C++"
+	targetdir("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
+	objdir("%{wks.location}/build/bin/intermediates/" .. outputdir .. "/%{prj.name}")
+	files { "src/**.hpp", "src/**.cpp" }
+	includedirs { 
+        "%{prj.location}/dep/glad/include", 
+        "%{prj.location}/dep/glfw/include", 
+        "%{prj.location}/dep/stb/src", 
+    }
+	defines { "GLFW_INCLUDE_NONE" }
+	links { "glad", "glfw", "stb" }
+	warnings "Extra"
+	filter "configurations:Debug"
+		defines "_CONFIG_DEBUG"
+		optimize "Off"
+		symbols "On"
+	filter "configurations:DebugOptimized"
+		defines "_CONFIG_DEBUG_OPTIMIZED"
+		optimize "Full"
+		symbols "on"
+	filter "configurations:Release"
+		defines "_CONFIG_RELEASE"
+		optimize "Full"
+		symbols "Off"
+	filter "system:windows"
+		systemversion "latest"
+		defines "_CONFIG_PLATFORM_WINDOWS"
+	filter "system:linux"
+		defines "_CONFIG_PLATFORM_LINUX"
+	filter "system:macosx"
+		defines "_CONFIG_PLATFORM_MACOS"
