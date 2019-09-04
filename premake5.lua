@@ -2,7 +2,7 @@ include "dep/glad"
 include "dep/glfw"
 include "dep/stb"
 
-project "coel"
+project "engine"
 	kind "StaticLib"
 	language "C++"
 	targetdir("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
