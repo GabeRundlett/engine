@@ -1,11 +1,11 @@
-project "testing"
+project "test"
 	kind "ConsoleApp"
 	language "C++"
 	targetdir("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/build/bin/intermediates/" .. outputdir .. "/%{prj.name}")
 	files { "src/**.hpp", "src/**.cpp" }
 	includedirs { "%{include_dir.coel}", "%{include_dir.math}" }
-	links { "coel", "math" }
+	links { "coel" }
 	warnings "Extra"
 	filter "configurations:Debug"
 		defines "_CONFIG_DEBUG"
@@ -24,5 +24,7 @@ project "testing"
 		defines "_CONFIG_PLATFORM_WINDOWS"
 	filter "system:linux"
 		defines "_CONFIG_PLATFORM_LINUX"
+        links { "glfw", "glad", "math", "stb" }
+        links { "X11", "dl", "pthread" }
 	filter "system:macosx"
 		defines "_CONFIG_PLATFORM_MACOS"
