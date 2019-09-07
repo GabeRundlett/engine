@@ -4,7 +4,10 @@
 #include <glad/glad.h>
 #include <stb/image.hpp>
 
+#ifndef CONFIG_RELEASE
 #include <iostream>
+#include <vector>
+#endif
 
 namespace coel {
     static unsigned int s_texture_count = 0;
@@ -82,9 +85,34 @@ namespace coel {
         glShaderSource(vertexShader, 1, &vert_src, NULL);
         glCompileShader(vertexShader);
 
+#ifndef CONFIG_RELEASE
+        int temp = 0;
+        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &temp);
+        if (temp == GL_FALSE) {
+            temp = 0;
+            glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &temp);
+            std::vector<char> infoLog(temp);
+            glGetShaderInfoLog(vertexShader, temp, &temp, &infoLog[0]);
+            glDeleteShader(vertexShader);
+            std::cout << infoLog.data() << '\n';
+        }
+#endif
+
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &frag_src, NULL);
         glCompileShader(fragmentShader);
+
+#ifndef CONFIG_RELEASE
+        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &temp);
+        if (temp == GL_FALSE) {
+            glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &temp);
+            std::vector<char> infoLog(temp);
+            glGetShaderInfoLog(fragmentShader, temp, &temp, &infoLog[0]);
+            glDeleteShader(fragmentShader);
+            glDeleteShader(vertexShader);
+            std::cout << infoLog.data() << '\n';
+        }
+#endif
 
         id = glCreateProgram();
         glAttachShader(id, vertexShader);
