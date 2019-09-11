@@ -128,14 +128,14 @@ namespace coel {
     void Shader::send_float(const char *const name, const float value) const {
         glUniform1f(glGetUniformLocation(id, name), value);
     }
-    void Shader::send_float2(const char *const name, const float *const data) const {
-        glUniform2fv(glGetUniformLocation(id, name), 1, data);
+    void Shader::send_float2(const char *const name, const void *const data) const {
+        glUniform2fv(glGetUniformLocation(id, name), 1, reinterpret_cast<const float *const>(data));
     }
-    void Shader::send_float3(const char *const name, const float *const data) const {
-        glUniform3fv(glGetUniformLocation(id, name), 1, data);
+    void Shader::send_float3(const char *const name, const void *const data) const {
+        glUniform3fv(glGetUniformLocation(id, name), 1, reinterpret_cast<const float *const>(data));
     }
-    void Shader::send_float4(const char *const name, const float *const data) const {
-        glUniform4fv(glGetUniformLocation(id, name), 1, data);
+    void Shader::send_float4(const char *const name, const void *const data) const {
+        glUniform4fv(glGetUniformLocation(id, name), 1, reinterpret_cast<const float *const>(data));
     }
     Texture::Texture(const char *const filepath) : filepath(filepath) {
         stbi_set_flip_vertically_on_load(true);
@@ -292,7 +292,8 @@ namespace coel {
                 s_index_count += 6;
             }
             void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y,
-                             const unsigned char *const col) {
+                             const void *const _col) {
+                const unsigned char *const col = reinterpret_cast<const unsigned char *const>(_col);
                 s_vbuffer_pointer->pos_x = pos_x;
                 s_vbuffer_pointer->pos_y = pos_y;
                 s_vbuffer_pointer->tex_u = 0.f;

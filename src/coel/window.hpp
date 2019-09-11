@@ -216,9 +216,9 @@ namespace coel {
         Shader(const char *const vert_src, const char *const frag_src);
         void send_int(const char *const name, const int value) const;
         void send_float(const char *const name, const float value) const;
-        void send_float2(const char *const name, const float *const data) const;
-        void send_float3(const char *const name, const float *const data) const;
-        void send_float4(const char *const name, const float *const data) const;
+        void send_float2(const char *const name, const void *const data) const;
+        void send_float3(const char *const name, const void *const data) const;
+        void send_float4(const char *const name, const void *const data) const;
     };
     struct Texture {
         unsigned int id;
@@ -268,7 +268,7 @@ namespace coel {
             void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y,
                              const float tid = -1.f);
             void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y,
-                             const unsigned char col[4]);
+                             const void *const col);
             void flush();
         } // namespace batch2d
         namespace batch3d {
