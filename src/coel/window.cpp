@@ -13,6 +13,10 @@ namespace coel {
     static unsigned int s_texture_count = 0;
     Window::Window(const unsigned int width, const unsigned int height, const char *const title)
         : width(width), height(height), title(title) {
+        init(width, height, title);
+    }
+    void Window::init(const unsigned int width, const unsigned int height, const char *const title) {
+        this->width = width, this->height = height, this->title = title;
         // init window manager
         glfwInit();
         GLFWwindow *result = glfwCreateWindow(width, height, title, nullptr, nullptr);

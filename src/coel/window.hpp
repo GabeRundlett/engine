@@ -190,9 +190,11 @@ namespace coel {
 namespace coel {
     struct Window {
         unsigned int width, height;
-        const char *const title;
+        const char *title;
         void *window_handle;
+        Window() {}
         Window(const unsigned int width, const unsigned int height, const char *const title);
+        void init(const unsigned int width, const unsigned int height, const char *const title);
         void update();
         void make_current();
         bool should_close();
@@ -209,6 +211,9 @@ namespace coel {
         virtual void window_close(const WindowClose &e) {}
         virtual void window_focus(const WindowFocus &e) {}
         virtual void window_defocus(const WindowDefocus &e) {}
+        virtual Window operator=(const Window &w) {
+            width = w.width, height = w.height, title = w.title, window_handle = w.window_handle;
+        }
     };
     struct Shader {
         unsigned int id;
@@ -224,10 +229,14 @@ namespace coel {
         unsigned int id;
         int width, height;
         ColorSpace color_space;
-        const char *const filepath;
+        const char *filepath;
+        Texture() {}
         Texture(const char *const filepath);
         Texture(const int width, const int height, ColorSpace space);
         void update(const void *const data);
+        Texture operator=(const Texture &t) {
+            id = t.id, width = t.width, height = t.height, color_space = t.color_space, filepath = t.filepath;
+        }
     };
     struct Model {
         const void *vdata;
