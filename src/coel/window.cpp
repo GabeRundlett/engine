@@ -180,6 +180,24 @@ namespace coel {
         default: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr); break;
         }
     }
+    void Texture::init(const int width, const int height, ColorSpace space) {
+        this->width = width, this->height = height, this->color_space = space, this->filepath = nullptr;
+        glGenTextures(1, &id);
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        switch (color_space) {
+        case ColorSpace::RGB:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+            break;
+        case ColorSpace::RGBA:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            break;
+        default: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr); break;
+        }
+    }
     void Texture::update(const void *const data) {
         glBindTexture(GL_TEXTURE_2D, id);
         switch (color_space) {

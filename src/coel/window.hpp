@@ -233,6 +233,7 @@ namespace coel {
         Texture() {}
         Texture(const char *const filepath);
         Texture(const int width, const int height, ColorSpace space);
+        void init(const int width, const int height, ColorSpace space);
         void update(const void *const data);
         Texture operator=(const Texture &t) {
             id = t.id, width = t.width, height = t.height, color_space = t.color_space, filepath = t.filepath;
