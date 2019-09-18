@@ -213,6 +213,7 @@ namespace coel {
         virtual void window_defocus(const WindowDefocus &e) {}
         virtual Window operator=(const Window &w) {
             width = w.width, height = w.height, title = w.title, window_handle = w.window_handle;
+            return *this;
         }
     };
     struct Shader {
