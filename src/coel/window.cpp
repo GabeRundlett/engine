@@ -84,49 +84,37 @@ namespace coel {
     void Window::make_current() { glfwMakeContextCurrent(reinterpret_cast<GLFWwindow *>(window_handle)); }
     bool Window::should_close() { return glfwWindowShouldClose(reinterpret_cast<GLFWwindow *>(window_handle)); }
     float Window::get_time() { return glfwGetTime(); }
-    Shader::Shader(const char *const vert_src, const char *const frag_src) : vert_src(vert_src), frag_src(frag_src) {
-        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vert_src, NULL);
-        glCompileShader(vertexShader);
+    void Shader::create_program() { id = glCreateProgram(); }
+    void Shader::link_program() {
+        glLinkProgram(id);
+        glUseProgram(id);
+    }
+    void Shader::compile_sources(const ShaderType type, const char *const src) {
+        int compiled_object_id;
+        switch (type) {
+        case ShaderType::Vertex: compiled_object_id = glCreateShader(GL_VERTEX_SHADER); break;
+        case ShaderType::Fragment: compiled_object_id = glCreateShader(GL_FRAGMENT_SHADER); break;
+        case ShaderType::Geometry: compiled_object_id = glCreateShader(GL_GEOMETRY_SHADER); break;
+        case ShaderType::Tesselation: compiled_object_id = 0; break;
+        case ShaderType::Compute: compiled_object_id = glCreateShader(GL_COMPUTE_SHADER); break;
+        }
+        glShaderSource(compiled_object_id, 1, &src, NULL);
+        glCompileShader(compiled_object_id);
 
 #ifndef CONFIG_RELEASE
         int temp = 0;
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &temp);
+        glGetShaderiv(compiled_object_id, GL_COMPILE_STATUS, &temp);
         if (temp == GL_FALSE) {
             temp = 0;
-            glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &temp);
+            glGetShaderiv(compiled_object_id, GL_INFO_LOG_LENGTH, &temp);
             std::vector<char> infoLog(temp);
-            glGetShaderInfoLog(vertexShader, temp, &temp, &infoLog[0]);
-            glDeleteShader(vertexShader);
+            glGetShaderInfoLog(compiled_object_id, temp, &temp, &infoLog[0]);
+            glDeleteShader(compiled_object_id);
             std::cout << infoLog.data() << '\n';
         }
 #endif
-
-        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &frag_src, NULL);
-        glCompileShader(fragmentShader);
-
-#ifndef CONFIG_RELEASE
-        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &temp);
-        if (temp == GL_FALSE) {
-            glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &temp);
-            std::vector<char> infoLog(temp);
-            glGetShaderInfoLog(fragmentShader, temp, &temp, &infoLog[0]);
-            glDeleteShader(fragmentShader);
-            glDeleteShader(vertexShader);
-            std::cout << infoLog.data() << '\n';
-        }
-#endif
-
-        id = glCreateProgram();
-        glAttachShader(id, vertexShader);
-        glAttachShader(id, fragmentShader);
-        glLinkProgram(id);
-
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
-        glUseProgram(id);
+        glAttachShader(id, compiled_object_id);
+        glDeleteShader(compiled_object_id);
     }
     void Shader::send_int(const char *const name, const int value) const { glUniform1i(glGetUniformLocation(id, name), value); }
     void Shader::send_float(const char *const name, const float value) const {

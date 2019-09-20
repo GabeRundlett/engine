@@ -185,6 +185,7 @@ namespace coel {
 namespace coel {
     enum class LayoutType : const unsigned char { Float, Int, UInt, Short, UShort, Byte, UByte };
     enum class ColorSpace : const unsigned char { RGB, RGBA };
+    enum class ShaderType : const unsigned char { Vertex, Fragment, Geometry, Tesselation, Compute };
 } // namespace coel
 
 namespace coel {
@@ -218,13 +219,25 @@ namespace coel {
     };
     struct Shader {
         unsigned int id;
-        const char *const vert_src, *const frag_src;
-        Shader(const char *const vert_src, const char *const frag_src);
+        template <typename... T> Shader(const ShaderType type, const char *const src, T... param) {
+            create_program();
+            compile_sources(type, src, param...);
+            link_program();
+        }
         void send_int(const char *const name, const int value) const;
         void send_float(const char *const name, const float value) const;
         void send_float2(const char *const name, const void *const data) const;
         void send_float3(const char *const name, const void *const data) const;
         void send_float4(const char *const name, const void *const data) const;
+
+      private:
+        void create_program();
+        void link_program();
+        void compile_sources(const ShaderType type, const char *const src);
+        template <typename... T> inline void compile_sources(const ShaderType type, const char *const src, T... param) {
+            compile_sources(type, src);
+            compile_sources(param...);
+        }
     };
     struct Texture {
         unsigned int id;
@@ -238,6 +251,7 @@ namespace coel {
         void update(const void *const data);
         Texture operator=(const Texture &t) {
             id = t.id, width = t.width, height = t.height, color_space = t.color_space, filepath = t.filepath;
+            return *this;
         }
     };
     struct Model {
