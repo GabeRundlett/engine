@@ -1,9 +1,6 @@
 [submodule "dep/glad"]
 	path = dep/glad
 	url = https://github.com/GabeRundlett/glad
-[submodule "dep/glfw"]
-	path = dep/glfw
-	url = https://github.com/GabeRundlett/glfw
 [submodule "dep/stb"]
 	path = dep/stb
 	url = https://github.com/GabeRundlett/stb
