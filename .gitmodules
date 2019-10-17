@@ -4,3 +4,6 @@
 [submodule "dep/stb"]
 	path = dep/stb
 	url = https://github.com/GabeRundlett/stb
+[submodule "dep/glfw"]
+	path = dep/glfw
+	url = https://github.com/glfw/glfw
