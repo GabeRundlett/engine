@@ -49,6 +49,7 @@ namespace coel {
         glfwSetWindowSizeCallback(result, [](GLFWwindow *w, int width, int height) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
             renderer::viewport(width, height);
+            renderer::batch2d::resize(width, height);
             window->window_resize({width, height});
         });
         glfwSetWindowFocusCallback(result, [](GLFWwindow *w, int focus) {
@@ -72,6 +73,7 @@ namespace coel {
     void Window::update() {
         GLFWwindow *window = reinterpret_cast<GLFWwindow *>(window_handle);
         glfwPollEvents();
+        this->on_update();
         glfwSwapBuffers(window);
     }
     void Window::make_current() { glfwMakeContextCurrent(reinterpret_cast<GLFWwindow *>(window_handle)); }

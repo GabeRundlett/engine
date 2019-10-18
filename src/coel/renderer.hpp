@@ -44,9 +44,10 @@ namespace coel { namespace renderer {
             unsigned char col_r, col_g, col_b, col_a;
             float tid;
         };
-        void init();
+        void init(const unsigned int width, const unsigned int height);
+        void resize(const unsigned int width, const unsigned int height);
+        // constexpr arg (template specialization) for whether to center the rect
         void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const float tid = -1.f);
-        void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const void *const col);
         void flush();
     } // namespace batch2d
     namespace batch3d {

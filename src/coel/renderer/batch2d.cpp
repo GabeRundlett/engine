@@ -8,7 +8,12 @@ namespace coel { namespace renderer { namespace batch2d {
     static unsigned short s_indices[s_ibuffer_size];
     static unsigned int s_index_count = 0;
     static Vertex *s_vbuffer_pointer;
-    void init() {
+
+    static unsigned int s_viewport_width, s_viewport_height;
+
+    void init(const unsigned int width, const unsigned int height) {
+        resize(width, height);
+
         glGenVertexArrays(1, &s_vao_id);
         glBindVertexArray(s_vao_id);
 
@@ -41,9 +46,15 @@ namespace coel { namespace renderer { namespace batch2d {
 
         s_vbuffer_pointer = reinterpret_cast<Vertex *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
     }
+
+    void resize(const unsigned int width, const unsigned int height) { s_viewport_width = width, s_viewport_height = height; }
+
     void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const float tid) {
-        s_vbuffer_pointer->pos_x = pos_x;
-        s_vbuffer_pointer->pos_y = pos_y;
+        const float px = 2.f * pos_x / s_viewport_width - 1, py = -2.f * pos_y / s_viewport_height + 1,
+                    sx = 2.f * size_x / s_viewport_width, sy = -2.f * size_y / s_viewport_height;
+
+        s_vbuffer_pointer->pos_x = px;
+        s_vbuffer_pointer->pos_y = py;
         s_vbuffer_pointer->tex_u = 0.f;
         s_vbuffer_pointer->tex_v = 0.f;
         s_vbuffer_pointer->tid = tid;
@@ -52,8 +63,8 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->col_b = 255;
         s_vbuffer_pointer->col_a = 255;
         ++s_vbuffer_pointer;
-        s_vbuffer_pointer->pos_x = pos_x;
-        s_vbuffer_pointer->pos_y = pos_y + size_y;
+        s_vbuffer_pointer->pos_x = px;
+        s_vbuffer_pointer->pos_y = py + sy;
         s_vbuffer_pointer->tex_u = 0.f;
         s_vbuffer_pointer->tex_v = 1.f;
         s_vbuffer_pointer->tid = tid;
@@ -62,8 +73,8 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->col_b = 255;
         s_vbuffer_pointer->col_a = 255;
         ++s_vbuffer_pointer;
-        s_vbuffer_pointer->pos_x = pos_x + size_x;
-        s_vbuffer_pointer->pos_y = pos_y;
+        s_vbuffer_pointer->pos_x = px + sx;
+        s_vbuffer_pointer->pos_y = py;
         s_vbuffer_pointer->tex_u = 1.f;
         s_vbuffer_pointer->tex_v = 0.f;
         s_vbuffer_pointer->tid = tid;
@@ -72,8 +83,8 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->col_b = 255;
         s_vbuffer_pointer->col_a = 255;
         ++s_vbuffer_pointer;
-        s_vbuffer_pointer->pos_x = pos_x + size_x;
-        s_vbuffer_pointer->pos_y = pos_y + size_y;
+        s_vbuffer_pointer->pos_x = px + sx;
+        s_vbuffer_pointer->pos_y = py + sy;
         s_vbuffer_pointer->tex_u = 1.f;
         s_vbuffer_pointer->tex_v = 1.f;
         s_vbuffer_pointer->tid = tid;
@@ -84,50 +95,7 @@ namespace coel { namespace renderer { namespace batch2d {
         ++s_vbuffer_pointer;
         s_index_count += 6;
     }
-    void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const void *const _col) {
-        const unsigned char *const col = reinterpret_cast<const unsigned char *const>(_col);
-        s_vbuffer_pointer->pos_x = pos_x;
-        s_vbuffer_pointer->pos_y = pos_y;
-        s_vbuffer_pointer->tex_u = 0.f;
-        s_vbuffer_pointer->tex_v = 0.f;
-        s_vbuffer_pointer->tid = -1;
-        s_vbuffer_pointer->col_r = col[0];
-        s_vbuffer_pointer->col_g = col[1];
-        s_vbuffer_pointer->col_b = col[2];
-        s_vbuffer_pointer->col_a = col[3];
-        ++s_vbuffer_pointer;
-        s_vbuffer_pointer->pos_x = pos_x;
-        s_vbuffer_pointer->pos_y = pos_y + size_y;
-        s_vbuffer_pointer->tex_u = 0.f;
-        s_vbuffer_pointer->tex_v = 1.f;
-        s_vbuffer_pointer->tid = -1;
-        s_vbuffer_pointer->col_r = col[0];
-        s_vbuffer_pointer->col_g = col[1];
-        s_vbuffer_pointer->col_b = col[2];
-        s_vbuffer_pointer->col_a = col[3];
-        ++s_vbuffer_pointer;
-        s_vbuffer_pointer->pos_x = pos_x + size_x;
-        s_vbuffer_pointer->pos_y = pos_y;
-        s_vbuffer_pointer->tex_u = 1.f;
-        s_vbuffer_pointer->tex_v = 0.f;
-        s_vbuffer_pointer->tid = -1;
-        s_vbuffer_pointer->col_r = col[0];
-        s_vbuffer_pointer->col_g = col[1];
-        s_vbuffer_pointer->col_b = col[2];
-        s_vbuffer_pointer->col_a = col[3];
-        ++s_vbuffer_pointer;
-        s_vbuffer_pointer->pos_x = pos_x + size_x;
-        s_vbuffer_pointer->pos_y = pos_y + size_y;
-        s_vbuffer_pointer->tex_u = 1.f;
-        s_vbuffer_pointer->tex_v = 1.f;
-        s_vbuffer_pointer->tid = -1;
-        s_vbuffer_pointer->col_r = col[0];
-        s_vbuffer_pointer->col_g = col[1];
-        s_vbuffer_pointer->col_b = col[2];
-        s_vbuffer_pointer->col_a = col[3];
-        ++s_vbuffer_pointer;
-        s_index_count += 6;
-    }
+
     void flush() {
         glUnmapBuffer(GL_ARRAY_BUFFER);
         glBindVertexArray(s_vao_id);

@@ -12,6 +12,7 @@ namespace coel {
         void make_current();
         bool should_close();
         float get_time();
+        virtual void on_update() {}
         virtual void key_press(const KeyPress &e) {}
         virtual void key_repeat(const KeyRepeat &e) {}
         virtual void key_release(const KeyRelease &e) {}
