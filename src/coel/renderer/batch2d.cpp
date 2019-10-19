@@ -49,7 +49,7 @@ namespace coel { namespace renderer { namespace batch2d {
 
     void resize(const unsigned int width, const unsigned int height) { s_viewport_width = width, s_viewport_height = height; }
 
-    void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const float tid) {
+    void fill_rect(const float pos_x, const float pos_y, const float size_x, const float size_y) {
         const float px = 2.f * pos_x / s_viewport_width - 1, py = -2.f * pos_y / s_viewport_height + 1,
                     sx = 2.f * size_x / s_viewport_width, sy = -2.f * size_y / s_viewport_height;
 
@@ -57,7 +57,7 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->pos_y = py;
         s_vbuffer_pointer->tex_u = 0.f;
         s_vbuffer_pointer->tex_v = 0.f;
-        s_vbuffer_pointer->tid = tid;
+        s_vbuffer_pointer->tid = -1.f;
         s_vbuffer_pointer->col_r = 156;
         s_vbuffer_pointer->col_g = 102;
         s_vbuffer_pointer->col_b = 255;
@@ -67,7 +67,7 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->pos_y = py + sy;
         s_vbuffer_pointer->tex_u = 0.f;
         s_vbuffer_pointer->tex_v = 1.f;
-        s_vbuffer_pointer->tid = tid;
+        s_vbuffer_pointer->tid = -1.f;
         s_vbuffer_pointer->col_r = 156;
         s_vbuffer_pointer->col_g = 102;
         s_vbuffer_pointer->col_b = 255;
@@ -77,7 +77,7 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->pos_y = py;
         s_vbuffer_pointer->tex_u = 1.f;
         s_vbuffer_pointer->tex_v = 0.f;
-        s_vbuffer_pointer->tid = tid;
+        s_vbuffer_pointer->tid = -1.f;
         s_vbuffer_pointer->col_r = 156;
         s_vbuffer_pointer->col_g = 102;
         s_vbuffer_pointer->col_b = 255;
@@ -87,7 +87,7 @@ namespace coel { namespace renderer { namespace batch2d {
         s_vbuffer_pointer->pos_y = py + sy;
         s_vbuffer_pointer->tex_u = 1.f;
         s_vbuffer_pointer->tex_v = 1.f;
-        s_vbuffer_pointer->tid = tid;
+        s_vbuffer_pointer->tid = -1.f;
         s_vbuffer_pointer->col_r = 156;
         s_vbuffer_pointer->col_g = 102;
         s_vbuffer_pointer->col_b = 255;

@@ -31,12 +31,18 @@ namespace coel {
             init_tex_mat(shader, slot + 1, texture_shader_data...);
         }
     };
+
+    struct Color {
+        unsigned char r, g, b, a;
+        constexpr Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {}
+        constexpr Color(unsigned int hex) : r(char(hex >> 24)), g(char(hex >> 16)), b(char(hex >> 8)), a(char(hex >> 0)) {}
+    };
 } // namespace coel
 
 namespace coel { namespace renderer {
-    void clear(const unsigned int color);
-    void clear(const float r, const float g, const float b, const float a = 1.f);
-    static inline void clear(const float val = 0.25) { clear(val, val, val, 1.f); }
+    void clear();
+    void clear_color(const Color &color);
+    void clear_color(const float r, const float g, const float b, const float a);
     void viewport(const float width, const float height);
     namespace batch2d {
         struct Vertex {
@@ -46,8 +52,9 @@ namespace coel { namespace renderer {
         };
         void init(const unsigned int width, const unsigned int height);
         void resize(const unsigned int width, const unsigned int height);
+        void fill_color(const Color &color);
         // constexpr arg (template specialization) for whether to center the rect
-        void submit_rect(const float pos_x, const float pos_y, const float size_x, const float size_y, const float tid = -1.f);
+        void fill_rect(const float pos_x, const float pos_y, const float size_x, const float size_y);
         void flush();
     } // namespace batch2d
     namespace batch3d {

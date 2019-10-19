@@ -75,6 +75,7 @@ namespace coel {
         glfwPollEvents();
         this->on_update();
         glfwSwapBuffers(window);
+        renderer::clear();
     }
     void Window::make_current() { glfwMakeContextCurrent(reinterpret_cast<GLFWwindow *>(window_handle)); }
     bool Window::should_close() { return glfwWindowShouldClose(reinterpret_cast<GLFWwindow *>(window_handle)); }
