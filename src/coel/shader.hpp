@@ -23,6 +23,7 @@ namespace coel {
             _internal::link_program(shader);
             return shader;
         }
+        void bind(const Shader &s);
         void send_int(const Shader &s, const char *const name, const int value);
         void send_float(const Shader &s, const char *const name, const float value);
         void send_float2(const Shader &s, const char *const name, const void *const data);

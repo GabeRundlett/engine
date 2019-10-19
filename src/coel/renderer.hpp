@@ -3,6 +3,8 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
+#include "../dep/math/src/math.hpp"
+
 namespace coel {
     enum class LayoutType : const unsigned char { Float, Int, UInt, Short, UShort, Byte, UByte };
 
@@ -31,28 +33,17 @@ namespace coel {
             init_tex_mat(shader, slot + 1, texture_shader_data...);
         }
     };
-
-    struct Color {
-        unsigned char r, g, b, a;
-        constexpr Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {}
-        constexpr Color(unsigned int hex) : r(char(hex >> 24)), g(char(hex >> 16)), b(char(hex >> 8)), a(char(hex >> 0)) {}
-    };
 } // namespace coel
 
 namespace coel { namespace renderer {
     void clear();
-    void clear_color(const Color &color);
+    void clear_color(const math::Color &color);
     void clear_color(const float r, const float g, const float b, const float a);
     void viewport(const float width, const float height);
     namespace batch2d {
-        struct Vertex {
-            float pos_x, pos_y, tex_u, tex_v;
-            unsigned char col_r, col_g, col_b, col_a;
-            float tid;
-        };
         void init(const unsigned int width, const unsigned int height);
         void resize(const unsigned int width, const unsigned int height);
-        void fill_color(const Color &color);
+        void fill_color(const math::Color &color);
         // constexpr arg (template specialization) for whether to center the rect
         void fill_rect(const float pos_x, const float pos_y, const float size_x, const float size_y);
         void flush();

@@ -3,7 +3,7 @@
 
 namespace coel { namespace renderer {
     void clear() { glClear(GL_COLOR_BUFFER_BIT); }
-    void clear_color(const Color &color) {
+    void clear_color(const math::Color &color) {
         constexpr float fac = 1.f / 255;
         glClearColor(fac * color.r, fac * color.g, fac * color.b, fac * color.a);
     }

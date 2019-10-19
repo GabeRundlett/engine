@@ -42,6 +42,7 @@ namespace coel { namespace shader {
             glDeleteShader(compiled_object_id);
         }
     } // namespace _internal
+    void bind(const Shader &s) { glUseProgram(s.id); }
     void send_int(const Shader &s, const char *const name, const int value) {
         glUniform1i(glGetUniformLocation(s.id, name), value);
     }
