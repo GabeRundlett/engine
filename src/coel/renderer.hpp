@@ -41,11 +41,15 @@ namespace coel { namespace renderer {
     void clear_color(const float r, const float g, const float b, const float a);
     void viewport(const float width, const float height);
     namespace batch2d {
+        struct Rect {
+            math::Vec3 pos;
+            math::Vec2 size;
+            math::Vec4 data1 = {0, 0, 0, 0}, data2 = {0, 0, 0, 0};
+        };
         void init(const unsigned int width, const unsigned int height);
         void resize(const unsigned int width, const unsigned int height);
         void fill_color(const math::Color &color);
-        // constexpr arg (template specialization) for whether to center the rect
-        void fill_rect(const float pos_x, const float pos_y, const float size_x, const float size_y);
+        void fill_rect(const Rect &r);
         void flush();
     } // namespace batch2d
     namespace batch3d {

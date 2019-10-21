@@ -16,7 +16,7 @@ namespace coel {
         window_handle = reinterpret_cast<void *>(result);
         glfwMakeContextCurrent(result);
         // window manager prop
-        glfwSwapInterval(false);
+        glfwSwapInterval(true);
         glfwSetWindowUserPointer(result, this);
         // set window callbacks
         glfwSetKeyCallback(result, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
@@ -50,6 +50,7 @@ namespace coel {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
             renderer::viewport(width, height);
             renderer::batch2d::resize(width, height);
+            window->width = width, window->height = height;
             window->window_resize({width, height});
         });
         glfwSetWindowFocusCallback(result, [](GLFWwindow *w, int focus) {
