@@ -42,7 +42,7 @@ void main() {
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
 		g_o.size.x += mult.x * g_o.data1.x * 2;
-		g_o.size.y += mult.y * g_o.data1.x * 2;
+		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x -= mult.x * border_radius.x;
 		gl_Position.y -= mult.y * border_radius.y;
 	}
@@ -58,7 +58,7 @@ void main() {
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
 		g_o.size.x += mult.x * g_o.data1.x * 2;
-		g_o.size.y += mult.y * g_o.data1.x * 2;
+		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x -= mult.x * border_radius.x;
 		gl_Position.y += mult.y * border_radius.y;
 	}
@@ -74,7 +74,7 @@ void main() {
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
 		g_o.size.x += mult.x * g_o.data1.x * 2;
-		g_o.size.y += mult.y * g_o.data1.x * 2;
+		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x += mult.x * border_radius.x;
 		gl_Position.y -= mult.y * border_radius.y;
 	}
@@ -90,7 +90,7 @@ void main() {
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
 		g_o.size.x += mult.x * g_o.data1.x * 2;
-		g_o.size.y += mult.y * g_o.data1.x * 2;
+		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x += mult.x * border_radius.x;
 		gl_Position.y += mult.y * border_radius.y;
 	}

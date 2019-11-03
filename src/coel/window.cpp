@@ -36,6 +36,7 @@ namespace coel {
         });
         glfwSetCursorPosCallback(result, [](GLFWwindow *w, double xPos, double yPos) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            window->mouse = {float(xPos), float(yPos)};
             window->mouse_move({xPos, yPos});
         });
         glfwSetScrollCallback(result, [](GLFWwindow *w, double xOffset, double yOffset) {

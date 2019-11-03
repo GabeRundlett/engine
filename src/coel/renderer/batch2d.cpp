@@ -360,7 +360,7 @@ void main() {
         const vec2 real_size = abs(f.data2.xy) * window_size / 2;
         const vec2 radius = size - real_size;
         const vec2 outer_radius = radius / 2;
-        
+        
 
 
 

@@ -5,7 +5,8 @@ namespace coel {
         unsigned int width, height;
         const char *title;
         void *window_handle;
-        Window() {}
+        math::Vec2 mouse = {0, 0};
+        Window() = default;
         Window(const unsigned int width, const unsigned int height, const char *const title);
         void init(const unsigned int width, const unsigned int height, const char *const title);
         void update();
@@ -25,9 +26,5 @@ namespace coel {
         virtual void window_close(const WindowClose &e) {}
         virtual void window_focus(const WindowFocus &e) {}
         virtual void window_defocus(const WindowDefocus &e) {}
-        virtual Window operator=(const Window &w) {
-            width = w.width, height = w.height, title = w.title, window_handle = w.window_handle;
-            return *this;
-        }
     };
 } // namespace coel
