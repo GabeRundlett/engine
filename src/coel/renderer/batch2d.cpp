@@ -75,6 +75,30 @@ namespace coel { namespace renderer { namespace batch2d {
         if (s_sprite_count > s_sprite_max) flush();
     }
 
+    void fill_ellipse(const Ellipse &e) {
+        s_vbuffer_pointer->pos = e.pos;
+        s_vbuffer_pointer->size = e.size;
+        s_vbuffer_pointer->col = s_fill_color;
+        s_vbuffer_pointer->mat = 2.f;
+        s_vbuffer_pointer->data1 = e.data1;
+        s_vbuffer_pointer->data2 = e.data2;
+        ++s_vbuffer_pointer;
+        ++s_sprite_count;
+        if (s_sprite_count > s_sprite_max) flush();
+    }
+
+    void fill_line(const Line &e) {
+        s_vbuffer_pointer->pos = {e.a.x, e.a.y, 0.f};
+        s_vbuffer_pointer->size = e.b - e.a;
+        s_vbuffer_pointer->col = s_fill_color;
+        s_vbuffer_pointer->mat = 3.f;
+        s_vbuffer_pointer->data1 = e.data1;
+        s_vbuffer_pointer->data2 = e.data2;
+        ++s_vbuffer_pointer;
+        ++s_sprite_count;
+        if (s_sprite_count > s_sprite_max) flush();
+    }
+
     void flush() {
         glUnmapBuffer(GL_ARRAY_BUFFER);
         glBindVertexArray(s_vao_id);
@@ -336,7 +360,7 @@ void main() {
         const vec2 real_size = abs(f.data2.xy) * window_size / 2;
         const vec2 radius = size - real_size;
         const vec2 outer_radius = radius / 2;
-        
+        
 
 
 

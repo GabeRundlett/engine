@@ -46,10 +46,21 @@ namespace coel { namespace renderer {
             math::Vec2 size;
             math::Vec4 data1 = {0, 0, 0, 0}, data2 = {0, 0, 0, 0};
         };
+        struct Ellipse {
+            math::Vec3 pos;
+            math::Vec2 size;
+            math::Vec4 data1 = {0, 0, 0, 0}, data2 = {0, 0, 0, 0};
+        };
+        struct Line {
+            math::Vec2 a, b;
+            math::Vec4 data1 = {0, 0, 0, 0}, data2 = {0, 0, 0, 0};
+        };
         void init(const unsigned int width, const unsigned int height);
         void resize(const unsigned int width, const unsigned int height);
         void fill_color(const math::Color &color);
         void fill_rect(const Rect &r);
+        void fill_ellipse(const Ellipse &e);
+        void fill_line(const Line &l);
         void flush();
     } // namespace batch2d
     namespace batch3d {
