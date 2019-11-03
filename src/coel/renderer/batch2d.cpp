@@ -1,5 +1,6 @@
 #include "../../coel.hpp"
 #include <glad/glad.h>
+#include <string.h>
 
 namespace coel { namespace renderer { namespace batch2d {
     struct Sprite {
@@ -87,16 +88,31 @@ namespace coel { namespace renderer { namespace batch2d {
         if (s_sprite_count > s_sprite_max) flush();
     }
 
-    void fill_line(const Line &e) {
-        s_vbuffer_pointer->pos = {e.a.x, e.a.y, 0.f};
-        s_vbuffer_pointer->size = e.b - e.a;
+    void fill_line(const Line &l) {
+        s_vbuffer_pointer->pos = {l.a.x, l.a.y, 0.f};
+        s_vbuffer_pointer->size = l.b - l.a;
         s_vbuffer_pointer->col = s_fill_color;
         s_vbuffer_pointer->mat = 3.f;
-        s_vbuffer_pointer->data1 = e.data1;
-        s_vbuffer_pointer->data2 = e.data2;
+        s_vbuffer_pointer->data1 = l.data1;
+        s_vbuffer_pointer->data2 = l.data2;
         ++s_vbuffer_pointer;
         ++s_sprite_count;
         if (s_sprite_count > s_sprite_max) flush();
+    }
+
+    void fill_text(const Text &t) {
+        const unsigned int len = strlen(t.text);
+        for (unsigned int i = 0; i < len; ++i) {
+            s_vbuffer_pointer->pos = {t.pos.x + i * 21, t.pos.y, 0.f};
+            s_vbuffer_pointer->size = {20, 40};
+            s_vbuffer_pointer->col = s_fill_color;
+            s_vbuffer_pointer->mat = 4.f;
+            s_vbuffer_pointer->data1 = {float(t.text[i]), t.data1.y, t.data1.z, t.data1.w};
+            s_vbuffer_pointer->data2 = t.data2;
+            ++s_vbuffer_pointer;
+            ++s_sprite_count;
+            if (s_sprite_count > s_sprite_max) flush();
+        }
     }
 
     void flush() {
@@ -360,36 +376,6 @@ void main() {
         const vec2 real_size = abs(f.data2.xy) * window_size / 2;
         const vec2 radius = size - real_size;
         const vec2 outer_radius = radius / 2;
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         if (f.tid == 0.f) {
                 color = f.col;
