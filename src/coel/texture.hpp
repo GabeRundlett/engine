@@ -8,9 +8,9 @@ namespace coel {
         ColorSpace color_space;
         const char *filepath;
     };
-    namespace _internal {
+    namespace texture {
         Texture create(const char *const filepath);
         Texture create(const int width, const int height, const ColorSpace space);
-    } // namespace _internal
-    void update(const Texture &t, const void *const data);
+        void update(const Texture &t, const void *const data);
+    } // namespace texture
 } // namespace coel

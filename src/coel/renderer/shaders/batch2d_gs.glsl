@@ -36,8 +36,8 @@ void main() {
     g_o.tex = vec2(0, 0);
 	set_all_values();
 
-	if (g_o.mat < 2.5) {
-	} else if (g_o.mat < 3.5f) {
+    switch (int(g_o.mat + 0.5)) {
+    case 3: // Line
 		vec2 mult = vec2(1.f);
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
@@ -45,15 +45,17 @@ void main() {
 		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x -= mult.x * border_radius.x;
 		gl_Position.y -= mult.y * border_radius.y;
-	}
+    default:
+        break;
+    }
     EmitVertex();
     
     gl_Position = gl_in[0].gl_Position + vec4(0, g_i[0].size.y / window_size.y * -2, 0, 0);
     g_o.tex = vec2(0, 1);
 	set_all_values();
 
-	if (g_o.mat < 2.5) {
-	} else if (g_o.mat < 3.5f) {
+    switch (int(g_o.mat + 0.5)) {
+    case 3: // Line
 		vec2 mult = vec2(1.f);
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
@@ -61,15 +63,17 @@ void main() {
 		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x -= mult.x * border_radius.x;
 		gl_Position.y += mult.y * border_radius.y;
-	}
+    default:
+        break;
+    }
     EmitVertex();
     
     gl_Position = gl_in[0].gl_Position + vec4(g_i[0].size.x / window_size.x * 2, 0, 0, 0);
     g_o.tex = vec2(1, 0);
 	set_all_values();
 	
-	if (g_o.mat < 2.5) {
-	} else if (g_o.mat < 3.5f) {
+    switch (int(g_o.mat + 0.5)) {
+    case 3: // Line
 		vec2 mult = vec2(1.f);
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
@@ -77,15 +81,17 @@ void main() {
 		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x += mult.x * border_radius.x;
 		gl_Position.y -= mult.y * border_radius.y;
-	}
+    default:
+        break;
+    }
     EmitVertex();
     
     gl_Position = gl_in[0].gl_Position + vec4(g_i[0].size.x / window_size.x * 2, g_i[0].size.y / window_size.y * -2, 0, 0);
     g_o.tex = vec2(1, 1);
 	set_all_values();
 	
-	if (g_o.mat < 2.5) {
-	} else if (g_o.mat < 3.5f) {
+    switch (int(g_o.mat + 0.5)) {
+    case 3: // Line
 		vec2 mult = vec2(1.f);
 		if (g_o.size.x < 0.f) mult.x = -1.f;
 		if (g_o.size.y > 0.f) mult.y = -1.f;
@@ -93,7 +99,9 @@ void main() {
 		g_o.size.y -= mult.y * g_o.data1.x * 2;
 		gl_Position.x += mult.x * border_radius.x;
 		gl_Position.y += mult.y * border_radius.y;
-	}
+    default:
+        break;
+    }
     EmitVertex();
     
     EndPrimitive();

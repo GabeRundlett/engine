@@ -1,4 +1,5 @@
 #include "../../coel.hpp"
+#include "../texture.hpp"
 #include <glad/glad.h>
 #include <string.h>
 
@@ -18,6 +19,62 @@ namespace coel { namespace renderer { namespace batch2d {
     static math::Vec2 s_viewport;
     static math::Color s_fill_color = {255, 0, 255, 255};
 
+    static Texture arial_sdf;
+
+    struct BitmapCharData {
+        float u, v, s, t, x_off, y_off, x_adv;
+    };
+
+    static constexpr BitmapCharData arial_bcd[] = {
+        {362, 505, 4, 4, 1.500, 1.500, 23.063},    {361, 381, 12, 63, 5.938, 60.875, 23.000},
+        {487, 0, 25, 25, 2.313, 60.875, 29.438},   {202, 257, 48, 65, 0.625, 61.938, 46.188},
+        {318, 381, 43, 77, 1.438, 66.375, 46.125}, {80, 63, 67, 66, 3.313, 61.875, 73.813},
+        {432, 383, 53, 65, 2.063, 61.938, 55.313}, {185, 450, 12, 25, 2.125, 60.875, 15.813},
+        {0, 243, 23, 81, 3.500, 61.938, 27.625},   {23, 243, 23, 81, 3.500, 61.938, 27.625},
+        {27, 190, 30, 29, 1.063, 61.938, 32.313},  {368, 0, 43, 43, 3.125, 50.375, 48.500},
+        {185, 475, 12, 24, 5.375, 9.813, 23.063},  {262, 177, 26, 11, 1.125, 26.625, 27.688},
+        {361, 444, 12, 12, 6.063, 9.813, 23.063},  {23, 324, 27, 65, 1.500, 61.938, 23.063},
+        {80, 262, 42, 64, 1.938, 61.188, 46.188},  {485, 448, 25, 63, 7.500, 61.125, 46.188},
+        {387, 129, 43, 63, 1.000, 61.125, 46.188}, {80, 198, 42, 64, 2.000, 61.125, 46.188},
+        {464, 192, 45, 63, 0.438, 60.875, 46.188}, {202, 449, 43, 63, 1.938, 60.125, 46.188},
+        {142, 258, 43, 64, 1.625, 61.125, 46.188}, {430, 129, 42, 62, 2.438, 60.125, 46.125},
+        {142, 194, 43, 64, 1.875, 61.125, 46.125}, {202, 385, 43, 64, 1.938, 61.188, 46.125},
+        {362, 458, 12, 47, 6.000, 44.500, 23.063}, {245, 449, 12, 58, 5.375, 44.500, 23.063},
+        {243, 0, 43, 44, 3.063, 50.938, 48.500},   {27, 162, 43, 28, 3.125, 43.188, 48.500},
+        {286, 0, 43, 44, 3.063, 50.938, 48.500},   {142, 386, 42, 64, 2.125, 61.938, 46.188},
+        {0, 0, 80, 81, 3.000, 62.000, 84.250},     {260, 192, 59, 63, 1.625, 60.938, 55.375},
+        {368, 192, 48, 63, 4.563, 60.875, 55.375}, {376, 318, 56, 65, 2.625, 61.938, 59.938},
+        {432, 448, 53, 63, 4.875, 60.875, 59.938}, {416, 192, 48, 63, 5.063, 60.875, 55.375},
+        {202, 322, 44, 63, 5.313, 60.938, 50.688}, {202, 192, 58, 65, 2.938, 61.938, 64.563},
+        {260, 382, 50, 63, 5.125, 60.875, 59.938}, {184, 386, 11, 63, 6.250, 60.875, 23.063},
+        {350, 63, 36, 64, 0.813, 60.938, 41.500},  {376, 446, 53, 63, 4.563, 60.875, 55.375},
+        {270, 63, 41, 63, 4.563, 60.938, 46.125},  {202, 129, 60, 63, 4.688, 60.875, 69.188},
+        {260, 445, 50, 63, 4.813, 60.875, 59.938}, {142, 129, 60, 65, 2.500, 61.938, 64.563},
+        {319, 192, 49, 63, 4.875, 60.875, 55.375}, {80, 129, 62, 69, 2.063, 61.938, 64.563},
+        {376, 383, 56, 63, 5.000, 60.875, 59.938}, {432, 318, 51, 65, 2.313, 61.938, 55.313},
+        {427, 255, 51, 63, 0.438, 60.875, 50.688}, {260, 318, 50, 64, 5.000, 60.938, 59.938},
+        {260, 255, 58, 63, 1.188, 60.938, 55.375}, {80, 0, 80, 63, 0.500, 60.938, 78.313},
+        {318, 255, 58, 63, 1.188, 60.875, 55.375}, {318, 318, 58, 63, 1.313, 60.938, 55.375},
+        {376, 255, 51, 63, 0.188, 60.875, 50.750}, {46, 243, 20, 79, 4.125, 60.875, 23.063},
+        {485, 383, 27, 65, 1.500, 61.938, 23.063}, {43, 389, 20, 79, 0.063, 60.875, 23.063},
+        {449, 0, 38, 36, 0.688, 61.938, 38.938},   {324, 176, 52, 9, 2.750, 9.750, 46.188},
+        {288, 177, 19, 15, 2.063, 61.250, 27.625}, {142, 450, 43, 49, 1.500, 45.500, 46.125},
+        {80, 391, 41, 64, 3.938, 60.875, 46.125},  {160, 0, 41, 49, 1.750, 45.500, 41.500},
+        {147, 63, 41, 64, 1.313, 60.875, 46.125},  {80, 455, 43, 49, 1.563, 45.500, 46.188},
+        {483, 318, 29, 64, 0.750, 61.938, 23.000}, {80, 326, 41, 65, 1.188, 45.563, 46.188},
+        {472, 129, 39, 63, 4.000, 60.875, 46.188}, {246, 322, 11, 63, 4.000, 60.875, 18.438},
+        {23, 389, 20, 80, 5.313, 60.875, 18.438},  {311, 63, 39, 63, 4.000, 60.875, 41.500},
+        {245, 385, 11, 63, 3.813, 60.875, 18.438}, {262, 129, 62, 48, 4.000, 45.500, 69.188},
+        {329, 0, 39, 48, 4.000, 45.500, 46.188},   {318, 458, 44, 49, 1.250, 45.500, 46.125},
+        {229, 63, 41, 64, 4.000, 45.500, 46.188},  {188, 63, 41, 64, 1.438, 45.500, 46.188},
+        {50, 324, 27, 48, 3.875, 45.500, 27.625},  {473, 63, 39, 49, 1.000, 45.500, 41.438},
+        {478, 255, 25, 62, 0.063, 59.625, 23.063}, {411, 0, 38, 48, 3.813, 44.500, 46.125},
+        {430, 63, 43, 47, 0.500, 44.563, 41.500},  {324, 129, 63, 47, 1.313, 44.563, 59.938},
+        {386, 63, 44, 47, 0.938, 44.500, 41.500},  {142, 322, 43, 64, 0.188, 44.563, 41.500},
+        {201, 0, 42, 47, 0.125, 44.563, 41.563},   {0, 81, 27, 81, 0.813, 61.938, 27.688},
+        {63, 389, 10, 81, 6.125, 61.938, 21.563},  {0, 162, 27, 81, 0.375, 61.938, 27.750},
+        {449, 36, 45, 17, 2.000, 37.375, 48.438},
+    };
     static Shader s_shader;
     static constexpr char *const s_vertex_shader_source =
 #include "shaders/batch2d_vs.glsl"
@@ -47,14 +104,16 @@ namespace coel { namespace renderer { namespace batch2d {
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Sprite), (const void *)12);
         glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Sprite), (const void *)20);
         glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Sprite), (const void *)24);
-        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Sprite), (const void *)28);
-        glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(Sprite), (const void *)44);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Sprite), (const void *)28);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Sprite), (const void *)44);
 
         s_vbuffer_pointer = reinterpret_cast<Sprite *>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 
         s_shader = shader::create(ShaderType::Vertex, s_vertex_shader_source, ShaderType::Geometry, s_geometry_shader_source,
                                   ShaderType::Fragment, s_fragment_shader_source);
         resize(width, height);
+
+        arial_sdf = texture::create("arial_sdf.png");
     }
 
     void resize(const unsigned int width, const unsigned int height) {
@@ -102,16 +161,21 @@ namespace coel { namespace renderer { namespace batch2d {
 
     void fill_text(const Text &t) {
         const unsigned int len = strlen(t.text);
+        float cursor = t.pos.x;
         for (unsigned int i = 0; i < len; ++i) {
-            s_vbuffer_pointer->pos = {t.pos.x + i * 21, t.pos.y, 0.f};
-            s_vbuffer_pointer->size = {20, 40};
+            const char cid = t.text[i];
+            constexpr float scale = 14.f / 59;
+            const BitmapCharData &temp_bcd = arial_bcd[cid - 32];
+            s_vbuffer_pointer->pos = {cursor + temp_bcd.x_off * scale, t.pos.y - temp_bcd.y_off * scale, 0.f};
+            s_vbuffer_pointer->size = {temp_bcd.s * scale, temp_bcd.t * scale};
             s_vbuffer_pointer->col = s_fill_color;
             s_vbuffer_pointer->mat = 4.f;
-            s_vbuffer_pointer->data1 = {float(t.text[i]), t.data1.y, t.data1.z, t.data1.w};
-            s_vbuffer_pointer->data2 = t.data2;
+            s_vbuffer_pointer->data1 = {temp_bcd.u, temp_bcd.v, temp_bcd.x_off, temp_bcd.y_off};
+            s_vbuffer_pointer->data2 = {temp_bcd.s, temp_bcd.t, temp_bcd.x_adv, 0.f};
             ++s_vbuffer_pointer;
             ++s_sprite_count;
             if (s_sprite_count > s_sprite_max) flush();
+            cursor += temp_bcd.x_adv * scale;
         }
     }
 
@@ -256,7 +320,7 @@ out GS_OUT {
 } g_o;
 
 void main() {
-        gl_Position = gl_in[0].gl_Position + vec4(0, 0, 0, 0);
+        gl_Position = gl_in[0].gl_Position + vec4(0, 0);
         g_o.size = g_i[0].size;
         g_o.tex = vec2(0, 0);
         g_o.col = g_i[0].col;
@@ -264,7 +328,7 @@ void main() {
         g_o.tid = g_i[0].tid;
         if (g_o.tid == 0.f || g_o.tid == 1.f) {
                 gl_Position += vec4(-blur_rate * gl_in[0].gl_Position.z / window_size.x *  2,
-                                                        -blur_rate * gl_in[0].gl_Position.z / window_size.y * -2, 0, 0);
+                                                        -blur_rate * gl_in[0].gl_Position.z / window_size.y * -2);
                 g_o.data += vec4(
                         blur_rate * gl_in[0].gl_Position.z / window_size.x * 4,
                         blur_rate * gl_in[0].gl_Position.z / window_size.y * 4,
@@ -276,7 +340,7 @@ void main() {
                                                  blur_rate * gl_in[0].gl_Position.z / window_size.y * -4);
         }
         EmitVertex();
-        gl_Position = gl_in[0].gl_Position + vec4(g_i[0].size.x, 0, 0, 0);
+        gl_Position = gl_in[0].gl_Position + vec4(g_i[0].size.x, 0);
         g_o.size = g_i[0].size;
         g_o.tex = vec2(1, 0);
         g_o.col = g_i[0].col;
@@ -285,7 +349,7 @@ void main() {
 
         if (g_o.tid == 0.f || g_o.tid == 1.f) {
                 gl_Position += vec4( blur_rate * gl_in[0].gl_Position.z / window_size.x *  2,
-                                                        -blur_rate * gl_in[0].gl_Position.z / window_size.y * -2, 0, 0);
+                                                        -blur_rate * gl_in[0].gl_Position.z / window_size.y * -2);
                 g_o.data += vec4(
                         blur_rate * gl_in[0].gl_Position.z / window_size.x * 4,
                         blur_rate * gl_in[0].gl_Position.z / window_size.y * 4,
@@ -297,7 +361,7 @@ void main() {
                                                  blur_rate * gl_in[0].gl_Position.z / window_size.y * -4);
         }
         EmitVertex();
-        gl_Position = gl_in[0].gl_Position + vec4(0, g_i[0].size.y, 0, 0);
+        gl_Position = gl_in[0].gl_Position + vec4(0, g_i[0].size.y);
         g_o.size = g_i[0].size;
         g_o.tex = vec2(0, 1);
         g_o.col = g_i[0].col;
@@ -305,7 +369,7 @@ void main() {
         g_o.tid = g_i[0].tid;
         if (g_o.tid == 0.f || g_o.tid == 1.f) {
                 gl_Position += vec4(-blur_rate * gl_in[0].gl_Position.z / window_size.x *  2,
-                                                         blur_rate * gl_in[0].gl_Position.z / window_size.y * -2, 0, 0);
+                                                         blur_rate * gl_in[0].gl_Position.z / window_size.y * -2);
                 g_o.data += vec4(
                         blur_rate * gl_in[0].gl_Position.z / window_size.x * 4,
                         blur_rate * gl_in[0].gl_Position.z / window_size.y * 4,
@@ -317,7 +381,7 @@ void main() {
                                                  blur_rate * gl_in[0].gl_Position.z / window_size.y * -4);
         }
         EmitVertex();
-        gl_Position = gl_in[0].gl_Position + vec4(g_i[0].size.x, g_i[0].size.y, 0, 0);
+        gl_Position = gl_in[0].gl_Position + vec4(g_i[0].size.x, g_i[0].size.y);
         g_o.size = g_i[0].size;
         g_o.tex = vec2(1, 1);
         g_o.col = g_i[0].col;
@@ -325,7 +389,7 @@ void main() {
         g_o.tid = g_i[0].tid;
         if (g_o.tid == 0.f || g_o.tid == 1.f) {
                 gl_Position += vec4(blur_rate * gl_in[0].gl_Position.z / window_size.x *  2,
-                                                        blur_rate * gl_in[0].gl_Position.z / window_size.y * -2, 0, 0);
+                                                        blur_rate * gl_in[0].gl_Position.z / window_size.y * -2);
                 g_o.data += vec4(
                         blur_rate * gl_in[0].gl_Position.z / window_size.x * 4,
                         blur_rate * gl_in[0].gl_Position.z / window_size.y * 4,

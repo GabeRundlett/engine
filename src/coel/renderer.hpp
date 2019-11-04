@@ -3,7 +3,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
-#include "../dep/math/src/math.hpp"
+#include "../../dep/math/src/math.hpp"
 
 namespace coel {
     enum class LayoutType : const unsigned char { Float, Int, UInt, Short, UShort, Byte, UByte };
@@ -58,7 +58,6 @@ namespace coel { namespace renderer {
         struct Text {
             const char *const text;
             math::Vec2 pos;
-            math::Vec4 data1 = {0, 0, 0, 0}, data2 = {0, 0, 0, 0};
         };
         void init(const unsigned int width, const unsigned int height);
         void resize(const unsigned int width, const unsigned int height);
