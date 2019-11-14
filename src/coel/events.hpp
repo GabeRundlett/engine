@@ -168,8 +168,8 @@ namespace coel {
         Y = 89,
         Z = 90
     };
-    enum KeyMods : const unsigned short { Shift = 1, Control = 2, Alt = 4, Windows = 8, CapsLock = 16, NumLock = 32 };
-    enum MouseButton : const unsigned short {
+    enum class KeyMods : const unsigned short { Shift = 1, Control = 2, Alt = 4, Windows = 8, CapsLock = 16, NumLock = 32 };
+    enum class MouseButton : const unsigned short {
         Button1 = 0,
         Button2 = 1,
         Button3 = 2,
