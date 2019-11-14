@@ -1,3 +1,5 @@
+set(CMAKE_CXX_STANDARD 17)
+
 add_subdirectory(dep/glfw)
 add_subdirectory(dep/glad)
 add_subdirectory(dep/math)

@@ -168,8 +168,8 @@ namespace coel {
         Y = 89,
         Z = 90
     };
-    enum KeyMods : const unsigned short { Shift = 1, Control = 2, Alt = 4, Windows = 8, CapsLock = 16, NumLock = 32 };
-    enum MouseButton : const unsigned short {
+    enum class KeyMods : const unsigned short { Shift = 1, Control = 2, Alt = 4, Windows = 8, CapsLock = 16, NumLock = 32 };
+    enum class MouseButton : const unsigned short {
         Button1 = 0,
         Button2 = 1,
         Button3 = 2,
@@ -181,5 +181,24 @@ namespace coel {
         Left = Button1,
         Right = Button2,
         Middle = Button3
+    };
+
+    struct EventTable {
+        virtual void on_update() {}
+
+        virtual void key_press(const KeyPress &e) {}
+        virtual void key_release(const KeyRelease &e) {}
+        virtual void key_repeat(const KeyRepeat &e) {}
+
+        virtual void mouse_press(const MousePress &e) {}
+        virtual void mouse_release(const MouseRelease &e) {}
+        virtual void mouse_move(const MouseMove &e) {}
+        virtual void mouse_scroll(const MouseScroll &e) {}
+
+        virtual void window_move(const WindowMove &e) {}
+        virtual void window_resize(const WindowResize &e) {}
+        virtual void window_focus(const WindowFocus &e) {}
+        virtual void window_defocus(const WindowDefocus &e) {}
+        virtual void window_close(const WindowClose &e) {}
     };
 } // namespace coel
