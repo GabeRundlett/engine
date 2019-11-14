@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../../dep/math/src/math.hpp"
+
 namespace coel {
     struct KeyPress {
         int key, scancode, mods;
