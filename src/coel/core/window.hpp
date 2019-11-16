@@ -13,15 +13,15 @@ namespace coel {
         virtual void on_key_press(void (*const f)(const KeyPress &)) = 0;
         virtual void on_key_repeat(void (*const f)(const KeyRepeat &)) = 0;
         virtual void on_key_release(void (*const f)(const KeyRelease &)) = 0;
-        virtual void mouse_press(void (*const f)(const MousePress &)) = 0;
-        virtual void mouse_release(void (*const f)(const MouseRelease &)) = 0;
-        virtual void mouse_move(void (*const f)(const MouseMove &)) = 0;
-        virtual void mouse_scroll(void (*const f)(const MouseScroll &)) = 0;
-        virtual void window_move(void (*const f)(const WindowMove &)) = 0;
-        virtual void window_resize(void (*const f)(const WindowResize &)) = 0;
-        virtual void window_focus(void (*const f)(const WindowFocus &)) = 0;
-        virtual void window_defocus(void (*const f)(const WindowDefocus &)) = 0;
-        virtual void window_close(void (*const f)(const WindowClose &)) = 0;
+        virtual void on_mouse_press(void (*const f)(const MousePress &)) = 0;
+        virtual void on_mouse_release(void (*const f)(const MouseRelease &)) = 0;
+        virtual void on_mouse_move(void (*const f)(const MouseMove &)) = 0;
+        virtual void on_mouse_scroll(void (*const f)(const MouseScroll &)) = 0;
+        virtual void on_window_move(void (*const f)(const WindowMove &)) = 0;
+        virtual void on_window_resize(void (*const f)(const WindowResize &)) = 0;
+        virtual void on_window_focus(void (*const f)(const WindowFocus &)) = 0;
+        virtual void on_window_defocus(void (*const f)(const WindowDefocus &)) = 0;
+        virtual void on_window_close(void (*const f)(const WindowClose &)) = 0;
     };
 
     namespace windows {
@@ -47,6 +47,7 @@ namespace coel {
 
           public:
             Window(const int width, const int height, const char *const title);
+            ~Window();
             bool is_open() const override;
             void update() override;
 
@@ -54,16 +55,16 @@ namespace coel {
             void on_key_repeat(void (*const f)(const KeyRepeat &)) override;
             void on_key_release(void (*const f)(const KeyRelease &)) override;
 
-            void mouse_press(void (*const f)(const MousePress &)) override;
-            void mouse_release(void (*const f)(const MouseRelease &)) override;
-            void mouse_move(void (*const f)(const MouseMove &)) override;
-            void mouse_scroll(void (*const f)(const MouseScroll &)) override;
+            void on_mouse_press(void (*const f)(const MousePress &)) override;
+            void on_mouse_release(void (*const f)(const MouseRelease &)) override;
+            void on_mouse_move(void (*const f)(const MouseMove &)) override;
+            void on_mouse_scroll(void (*const f)(const MouseScroll &)) override;
 
-            void window_move(void (*const f)(const WindowMove &)) override;
-            void window_resize(void (*const f)(const WindowResize &)) override;
-            void window_focus(void (*const f)(const WindowFocus &)) override;
-            void window_defocus(void (*const f)(const WindowDefocus &)) override;
-            void window_close(void (*const f)(const WindowClose &)) override;
+            void on_window_move(void (*const f)(const WindowMove &)) override;
+            void on_window_resize(void (*const f)(const WindowResize &)) override;
+            void on_window_focus(void (*const f)(const WindowFocus &)) override;
+            void on_window_defocus(void (*const f)(const WindowDefocus &)) override;
+            void on_window_close(void (*const f)(const WindowClose &)) override;
         };
     } // namespace windows
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "coel/core/app.hpp"
 #include "coel/core/events.hpp"
 #include "coel/core/renderer.hpp"
 #include "coel/core/window.hpp"

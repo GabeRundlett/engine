@@ -3,7 +3,8 @@
 
 #define GLFW_INCLUDE_NONE 1
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
+
+#include <debug.hpp>
 
 namespace coel { namespace windows {
     namespace default_callbacks {
@@ -31,11 +32,20 @@ namespace coel { namespace windows {
           m_window_resize_callback(default_callbacks::window_resize), m_window_focus_callback(default_callbacks::window_focus),
           m_window_defocus_callback(default_callbacks::window_defocus),
           m_window_close_callback(default_callbacks::window_close) {
+
+        SCOPED_PROFILE;
+
         glfwInit();
-        m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        {
+            ::debug::profile::ScopedProfile profile("glfwCreateWindow");
+            m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        }
 
         Renderer::set_api(RendererAPI::OpenGL);
         m_context = create_context(m_window);
+        Renderer::init();
+
+        glfwSwapInterval(0);
 
         glfwSetWindowUserPointer(m_window, this);
         glfwSetKeyCallback(m_window, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
@@ -67,6 +77,7 @@ namespace coel { namespace windows {
         });
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow *w, int width, int height) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
+            Renderer::set_viewport(0, 0, width, height);
             window->m_width = width, window->m_height = height;
             window->m_window_resize_callback({width, height});
         });
@@ -83,24 +94,28 @@ namespace coel { namespace windows {
         });
     }
 
+    Window::~Window() { debug::profile::end(); }
+
     void Window::on_key_press(void (*const f)(const KeyPress &)) { m_key_press_callback = f; }
     void Window::on_key_repeat(void (*const f)(const KeyRepeat &)) { m_key_repeat_callback = f; }
     void Window::on_key_release(void (*const f)(const KeyRelease &)) { m_key_release_callback = f; }
 
-    void Window::mouse_press(void (*const f)(const MousePress &)) { m_mouse_press_callback = f; };
-    void Window::mouse_release(void (*const f)(const MouseRelease &)) { m_mouse_release_callback = f; };
-    void Window::mouse_move(void (*const f)(const MouseMove &)) { m_mouse_move_callback = f; };
-    void Window::mouse_scroll(void (*const f)(const MouseScroll &)) { m_mouse_scroll_callback = f; };
+    void Window::on_mouse_press(void (*const f)(const MousePress &)) { m_mouse_press_callback = f; };
+    void Window::on_mouse_release(void (*const f)(const MouseRelease &)) { m_mouse_release_callback = f; };
+    void Window::on_mouse_move(void (*const f)(const MouseMove &)) { m_mouse_move_callback = f; };
+    void Window::on_mouse_scroll(void (*const f)(const MouseScroll &)) { m_mouse_scroll_callback = f; };
 
-    void Window::window_move(void (*const f)(const WindowMove &)) { m_window_move_callback = f; };
-    void Window::window_resize(void (*const f)(const WindowResize &)) { m_window_resize_callback = f; };
-    void Window::window_focus(void (*const f)(const WindowFocus &)) { m_window_focus_callback = f; };
-    void Window::window_defocus(void (*const f)(const WindowDefocus &)) { m_window_defocus_callback = f; };
-    void Window::window_close(void (*const f)(const WindowClose &)) { m_window_close_callback = f; };
+    void Window::on_window_move(void (*const f)(const WindowMove &)) { m_window_move_callback = f; };
+    void Window::on_window_resize(void (*const f)(const WindowResize &)) { m_window_resize_callback = f; };
+    void Window::on_window_focus(void (*const f)(const WindowFocus &)) { m_window_focus_callback = f; };
+    void Window::on_window_defocus(void (*const f)(const WindowDefocus &)) { m_window_defocus_callback = f; };
+    void Window::on_window_close(void (*const f)(const WindowClose &)) { m_window_close_callback = f; };
 
     bool Window::is_open() const { return !glfwWindowShouldClose(m_window); }
 
     void Window::update() {
+        SCOPED_PROFILE;
+
         m_context->swap();
         glfwPollEvents();
     }
