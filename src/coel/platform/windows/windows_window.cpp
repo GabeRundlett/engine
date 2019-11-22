@@ -39,6 +39,10 @@ namespace coel { namespace windows {
         {
             ::debug::profile::ScopedProfile profile("glfwCreateWindow");
             m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+            if (m_window)
+                m_is_open = true;
+            else
+                m_is_open = false;
         }
 
         Renderer::set_api(RendererAPI::OpenGL);
@@ -96,6 +100,28 @@ namespace coel { namespace windows {
 
     Window::~Window() { debug::profile::end(); }
 
+    bool Window::should_close() const { return glfwWindowShouldClose(m_window); }
+
+    void Window::update() {
+        SCOPED_PROFILE;
+
+        m_context->swap();
+        glfwPollEvents();
+    }
+
+    void Window::bind() {
+        SCOPED_PROFILE;
+
+        m_context->bind();
+    }
+
+    void Window::close() {
+        SCOPED_PROFILE;
+
+        m_is_open = false;
+        glfwDestroyWindow(m_window);
+    }
+
     void Window::on_key_press(void (*const f)(const KeyPress &)) { m_key_press_callback = f; }
     void Window::on_key_repeat(void (*const f)(const KeyRepeat &)) { m_key_repeat_callback = f; }
     void Window::on_key_release(void (*const f)(const KeyRelease &)) { m_key_release_callback = f; }
@@ -110,13 +136,4 @@ namespace coel { namespace windows {
     void Window::on_window_focus(void (*const f)(const WindowFocus &)) { m_window_focus_callback = f; };
     void Window::on_window_defocus(void (*const f)(const WindowDefocus &)) { m_window_defocus_callback = f; };
     void Window::on_window_close(void (*const f)(const WindowClose &)) { m_window_close_callback = f; };
-
-    bool Window::is_open() const { return !glfwWindowShouldClose(m_window); }
-
-    void Window::update() {
-        SCOPED_PROFILE;
-
-        m_context->swap();
-        glfwPollEvents();
-    }
 }} // namespace coel::windows

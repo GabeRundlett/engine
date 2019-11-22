@@ -7,8 +7,11 @@
 namespace coel {
     class Window {
       public:
+        virtual bool should_close() const = 0;
         virtual bool is_open() const = 0;
         virtual void update() = 0;
+        virtual void bind() = 0;
+        virtual void close() = 0;
 
         virtual void on_key_press(void (*const f)(const KeyPress &)) = 0;
         virtual void on_key_repeat(void (*const f)(const KeyRepeat &)) = 0;
@@ -29,6 +32,7 @@ namespace coel {
             GLFWwindow *m_window;
             Scope<Context> m_context;
             int m_width, m_height;
+            bool m_is_open;
 
             void (*m_key_press_callback)(const KeyPress &);
             void (*m_key_repeat_callback)(const KeyRepeat &);
@@ -48,8 +52,11 @@ namespace coel {
           public:
             Window(const int width, const int height, const char *const title);
             ~Window();
-            bool is_open() const override;
+            bool should_close() const override;
+            bool is_open() const override { return m_is_open; }
             void update() override;
+            void bind() override;
+            void close() override;
 
             void on_key_press(void (*const f)(const KeyPress &)) override;
             void on_key_repeat(void (*const f)(const KeyRepeat &)) override;

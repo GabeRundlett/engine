@@ -11,3 +11,7 @@
 #if COEL_USE_GUI
 #include "coel/addons/gui/gui.hpp"
 #endif
+
+#if COEL_USE_WINDOW_MANAGER
+#include "coel/addons/window_manager/window_manager.hpp"
+#endif

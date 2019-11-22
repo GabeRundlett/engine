@@ -9,6 +9,7 @@ namespace coel {
     class Context {
       public:
         virtual void swap() = 0;
+        virtual void bind() = 0;
     };
 
     namespace opengl {
@@ -18,6 +19,7 @@ namespace coel {
           public:
             Context(GLFWwindow *window);
             void swap() override;
+            void bind() override;
         };
     } // namespace opengl
 

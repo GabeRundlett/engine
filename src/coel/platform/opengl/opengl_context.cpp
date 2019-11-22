@@ -18,4 +18,10 @@ namespace coel { namespace opengl {
 
         glfwSwapBuffers(m_window);
     }
+
+    void Context::bind() {
+        SCOPED_PROFILE;
+
+        glfwMakeContextCurrent(m_window);
+    }
 }} // namespace coel::opengl
