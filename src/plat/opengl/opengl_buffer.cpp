@@ -1,11 +1,11 @@
 #include "common.hpp"
-#include <core/renderer/buffer.hpp>
+#include <coel/renderer/buffer.hpp>
 
-#include <debug.hpp>
+#include <debug/debug.hpp>
 
 namespace coel { namespace opengl {
     Vbo::Vbo(const void *const data, const size_t size, const Layout &layout) : m_size(size), coel::Vbo(layout) {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glCreateBuffers(1, &m_id));
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_id));
@@ -26,13 +26,13 @@ namespace coel { namespace opengl {
     }
 
     void Vbo::bind() const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_id));
     }
 
     void Vbo::lock() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         COEL_ASSERT(!m_locked);
         COEL_ASSERT(m_buffertype == BufferType::Dynamic);
@@ -42,7 +42,7 @@ namespace coel { namespace opengl {
     }
 
     void Vbo::unlock() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         COEL_ASSERT(m_locked);
         COEL_ASSERT(m_buffertype == BufferType::Dynamic);
@@ -53,13 +53,13 @@ namespace coel { namespace opengl {
     }
 
     size_t Vbo::get_count() const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         return m_count;
     }
 
     Ibo::Ibo(const unsigned short *const data, const size_t size) : m_size(size) {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glCreateBuffers(1, &m_id));
         GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id));
@@ -80,13 +80,13 @@ namespace coel { namespace opengl {
     }
 
     void Ibo::bind() const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id));
     }
 
     void Ibo::lock() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         COEL_ASSERT(!m_locked);
         COEL_ASSERT(m_buffertype == BufferType::Dynamic);
@@ -96,7 +96,7 @@ namespace coel { namespace opengl {
     }
 
     void Ibo::unlock() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         COEL_ASSERT(m_locked);
         COEL_ASSERT(m_buffertype == BufferType::Dynamic);
@@ -107,7 +107,7 @@ namespace coel { namespace opengl {
     }
 
     size_t Ibo::get_count() const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         return m_count;
     }
@@ -121,20 +121,20 @@ namespace coel { namespace opengl {
     }
 
     Vao::Vao() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glGenVertexArrays(1, &m_id));
         GL_CALL(glBindVertexArray(m_id));
     }
 
     void Vao::bind() const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glBindVertexArray(m_id));
     }
 
     void Vao::draw(const Ref<coel::Ibo> ibo) const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glBindVertexArray(m_id));
         ibo->bind();
@@ -142,7 +142,7 @@ namespace coel { namespace opengl {
     }
 
     void Vao::add_vbo(const Ref<coel::Vbo> vbo) {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glBindVertexArray(m_id));
         vbo->bind();

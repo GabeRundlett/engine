@@ -1,16 +1,16 @@
-#include "../../core/renderer/shader.hpp"
 #include "common.hpp"
+#include <coel/renderer/shader.hpp>
 
 #ifndef NDEBUG
 #include <iostream>
 #include <vector>
 #endif
 
-#include <debug.hpp>
+#include <debug/debug.hpp>
 
 namespace coel { namespace opengl {
     static inline void compile_shader_source(const unsigned int program, const int type, const char *const src) {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(int compiled_object_id = glCreateShader(type));
         GL_CALL(glShaderSource(compiled_object_id, 1, &src, nullptr));
@@ -34,7 +34,7 @@ namespace coel { namespace opengl {
     }
 
     Shader::Shader(const char *const vert_src, const char *const frag_src) {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(m_id = glCreateProgram());
         GL_CALL(compile_shader_source(m_id, GL_VERTEX_SHADER, vert_src));
@@ -44,19 +44,19 @@ namespace coel { namespace opengl {
     }
 
     void Shader::bind() const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glUseProgram(m_id));
     }
 
     void Shader::send_int(const char *const location, const int value) const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         glUniform1i(glGetUniformLocation(m_id, location), value);
     }
 
     void Shader::send_float(const char *const location, const float value) const {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         glUniform1f(glGetUniformLocation(m_id, location), value);
     }

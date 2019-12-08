@@ -7,7 +7,7 @@ namespace coel {
         void init();
         void clear();
         void set_clear_color(float r, float g, float b, float a);
-        void set_viewport(float x, float y, float width, float height);
+        void set_viewport(int x, int y, int width, int height);
     } // namespace opengl
 
     class Renderer {
@@ -43,7 +43,7 @@ namespace coel {
             default: break;
             }
         }
-        static inline void set_viewport(float x, float y, float width, float height) {
+        static inline void set_viewport(int x, int y, int width, int height) {
             switch (s_renderer_api) {
             case RendererAPI::OpenGL: opengl::set_viewport(x, y, width, height); break;
             case RendererAPI::Vulkan:

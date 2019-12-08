@@ -1,26 +1,26 @@
-#include "../../core/renderer/context.hpp"
 #include "common.hpp"
+#include <coel/renderer/context.hpp>
 #define GLFW_INCLUDE_NONE 1
 #include <GLFW/glfw3.h>
 
-#include <debug.hpp>
+#include <debug/debug.hpp>
 
 namespace coel { namespace opengl {
     Context::Context(GLFWwindow *window) : m_window(window) {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         glfwMakeContextCurrent(m_window);
         gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
     }
 
     void Context::swap() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         glfwSwapBuffers(m_window);
     }
 
     void Context::bind() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         glfwMakeContextCurrent(m_window);
     }

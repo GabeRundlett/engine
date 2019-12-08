@@ -1,10 +1,10 @@
-#include "../../core/window.hpp"
-#include "../../core/renderer.hpp"
+#include <coel/renderer.hpp>
+#include <coel/window.hpp>
 
 #define GLFW_INCLUDE_NONE 1
 #include <GLFW/glfw3.h>
 
-#include <debug.hpp>
+#include <debug/debug.hpp>
 
 namespace coel { namespace windows {
     namespace default_callbacks {
@@ -33,11 +33,11 @@ namespace coel { namespace windows {
           m_window_defocus_callback(default_callbacks::window_defocus),
           m_window_close_callback(default_callbacks::window_close) {
 
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         glfwInit();
         {
-            ::debug::profile::ScopedProfile profile("glfwCreateWindow");
+            DEBUG_BEGIN_PROFILE(glfwCreateWindow);
             m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
             if (m_window)
                 m_is_open = true;
@@ -98,25 +98,25 @@ namespace coel { namespace windows {
         });
     }
 
-    Window::~Window() { debug::profile::end(); }
+    Window::~Window() {}
 
     bool Window::should_close() const { return glfwWindowShouldClose(m_window); }
 
     void Window::update() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         m_context->swap();
         glfwPollEvents();
     }
 
     void Window::bind() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         m_context->bind();
     }
 
     void Window::close() {
-        SCOPED_PROFILE;
+        DEBUG_BEGIN_FUNC_PROFILE;
 
         m_is_open = false;
         glfwDestroyWindow(m_window);
