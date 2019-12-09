@@ -24,6 +24,6 @@ namespace coel { namespace opengl {
 #define GL_CALL(x)                                                                                                             \
     ::coel::opengl::check_error();                                                                                             \
     x;                                                                                                                         \
-    if (::coel::opengl::send_error(#x, __FILE__, __LINE__)) __debugbreak();
-
+    if (::coel::opengl::send_error(#x, __FILE__, __LINE__))                                                                    \
+        while (true) {}
 #endif

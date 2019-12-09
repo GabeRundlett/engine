@@ -46,7 +46,9 @@ namespace coel { namespace opengl {
         GL_CALL(glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT));
         GL_CALL(glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
-        GL_CALL(glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_format, GL_UNSIGNED_BYTE, data));
+        if (data != nullptr) {
+            GL_CALL(glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_format, GL_UNSIGNED_BYTE, data));
+        }
     }
 
     void Texture::bind(const int slot) const {

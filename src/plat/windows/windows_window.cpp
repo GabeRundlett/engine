@@ -100,7 +100,11 @@ namespace coel { namespace windows {
 
     Window::~Window() {}
 
-    bool Window::should_close() const { return glfwWindowShouldClose(m_window); }
+    bool Window::should_close() const {
+        DEBUG_BEGIN_FUNC_PROFILE;
+
+        return glfwWindowShouldClose(m_window);
+    }
 
     void Window::update() {
         DEBUG_BEGIN_FUNC_PROFILE;

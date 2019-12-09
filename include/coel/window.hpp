@@ -78,10 +78,10 @@ namespace coel {
     static inline Ref<Window> create_window(const unsigned int width, const unsigned int height, const char *const frag_src) {
 #if _WIN64 || _WIN32
         return create_ref<windows::Window>(width, height, frag_src);
-#elif __linux__
-        return nullptr;
 #elif __APPLE__ && __MACH__
         return nullptr;
+#elif __linux__
+        return create_ref<windows::Window>(width, height, frag_src);
 #endif
     }
 } // namespace coel
