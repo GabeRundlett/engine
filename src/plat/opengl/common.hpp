@@ -19,11 +19,15 @@ namespace coel { namespace opengl {
         }
         return false;
     }
+    
+    static void fail() {
+        while(true){} //
+    }
 }} // namespace coel::opengl
 
 #define GL_CALL(x)                                                                                                             \
     ::coel::opengl::check_error();                                                                                             \
     x;                                                                                                                         \
     if (::coel::opengl::send_error(#x, __FILE__, __LINE__))                                                                    \
-        while (true) {}
+        ::coel::opengl::fail();
 #endif

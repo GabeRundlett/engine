@@ -2,7 +2,7 @@
 #include <debug/debug.hpp>
 
 int main() {
-    DEBUG_BEGIN_PROFILE_SESSION(master_test, "engine_prof.json");
+    DEBUG_PROFILE_SESSION(master_test, "engine_prof.json");
     auto window = coel::create_window(800, 800, "test");
     if (!window) return -1;
 
@@ -22,6 +22,5 @@ int main() {
     }
 
     window->close();
-    DEBUG_END_PROFILE_SESSION(master_test);
     return 0;
 }
