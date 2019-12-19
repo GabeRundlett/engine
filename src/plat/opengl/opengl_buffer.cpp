@@ -7,7 +7,7 @@ namespace coel { namespace opengl {
     Vbo::Vbo(const void *const data, const size_t size, const Layout &layout) : m_size(size), coel::Vbo(layout) {
         DEBUG_BEGIN_FUNC_PROFILE;
 
-        GL_CALL(glCreateBuffers(1, &m_id));
+        GL_CALL(glGenBuffers(1, &m_id));
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_id));
         if (data) {
             m_count = size / m_layout.stride;
@@ -61,7 +61,7 @@ namespace coel { namespace opengl {
     Ibo::Ibo(const unsigned short *const data, const size_t size) : m_size(size) {
         DEBUG_BEGIN_FUNC_PROFILE;
 
-        GL_CALL(glCreateBuffers(1, &m_id));
+        GL_CALL(glGenBuffers(1, &m_id));
         GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id));
         if (data) {
             m_count = size / sizeof(unsigned short);

@@ -16,8 +16,8 @@ int main() {
     vao->add_vbo(vbo);
 
     while (!window->should_close()) {
+        coel::Renderer::clear();
         vao->draw(ibo);
-
         window->update();
     }
 
