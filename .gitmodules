@@ -10,6 +10,3 @@
 [submodule "dep/math"]
 	path = dep/math
 	url = https://github.com/GabeRundlett/math
-[submodule "dep/debug"]
-	path = dep/debug
-	url = https://github.com/GabeRundlett/debug
