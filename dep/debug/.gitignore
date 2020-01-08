@@ -1,0 +1,39 @@
+# output binaries
+*.exe
+*.out
+*.dll
+*.lib
+*.obj
+*.bin
+*.ilk
+*.pdb
+*.so
+*.o
+*.a
+# visual studio files
+*.vcxproj
+*.filters
+*.user
+*.ipch
+*.sln
+*.suo
+*.log
+*.tlog
+*.db
+*.db-shm
+*.db-wal
+# cmake files 
+*.cmake
+*.stamp
+*.depend
+*.check_cache
+*.list
+*.rule
+*.dir
+# generated directories
+build
+.vscode
+.vs
+out
+# generated files
+*.json

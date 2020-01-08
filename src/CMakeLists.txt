@@ -1,12 +1,10 @@
-link_libraries(glfw glad stb debug_lib dl)
-include_directories(engine_include_dir)
+link_libraries(glfw glad stb debug1.0.0 dl)
 
 include_directories(
-    ${engine_include_dir}
+    ${lib_include_dir}
     ${glfw_include_dir}
     ${glad_include_dir}
     ${stb_include_dir}
-    ${debug_include_dir}
 )
 
 set(sources
@@ -30,4 +28,4 @@ elseif (UNIX)
     )
 endif()
 
-add_library(${PROJECT_NAME} ${sources})
+add_library(${lib_name} ${sources})
