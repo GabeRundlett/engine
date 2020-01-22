@@ -5,7 +5,7 @@ project(Coelengine VERSION 1.0.0)
 if (NOT TARGET Coelengine)
     add_subdirectory(dep/glfw)
     add_subdirectory(dep/glad)
-    add_subdirectory(dep/math)
+    add_subdirectory(dep/Math)
     add_subdirectory(dep/stb)
 
     add_subdirectory(src)
