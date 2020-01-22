@@ -1,31 +1,40 @@
-link_libraries(glfw glad stb debug1.0.0 dl)
+set(Headers
+    Buffer.hpp
+    Coel.hpp
+    Context.hpp
+    Core.hpp
+    Events.hpp
+    Layout.hpp
+    Renderer.hpp
+    Shader.hpp
+    Texture.hpp
+    Window.hpp
 
-include_directories(
-    ${lib_include_dir}
-    ${glfw_include_dir}
-    ${glad_include_dir}
-    ${stb_include_dir}
+    Opengl/Common.hpp
 )
-
-set(sources
-    plat/opengl/opengl_buffer.cpp
-    plat/opengl/opengl_context.cpp
-    plat/opengl/opengl_renderer.cpp
-    plat/opengl/opengl_shader.cpp
-    plat/opengl/opengl_texture.cpp
+set(Sources
+    Opengl/Buffer.cpp
+    Opengl/Context.cpp
+    Opengl/Renderer.cpp
+    Opengl/Shader.cpp
+    Opengl/Texture.cpp
 )
 
 if (WIN32)
-    set(sources ${sources} 
-        plat/windows/windows_window.cpp
+    set(Sources ${Sources}
+        Windows/Window.cpp
     )
 elseif (APPLE)
-    set(sources ${sources}
+    set(Sources ${Sources}
+        Windows/Window.cpp
     )
 elseif (UNIX)
-    set(sources ${sources} 
-        plat/windows/windows_window.cpp
+    set(Sources ${Sources}
+        Windows/Window.cpp
     )
 endif()
 
-add_library(${lib_name} ${sources})
+add_library(Coelengine ${Sources} ${Headers})
+target_link_libraries(Coelengine PUBLIC glfw glad math stb)
+target_compile_features(Coelengine PUBLIC cxx_std_17)
+target_include_directories(Coelengine PUBLIC ${CMAKE_CURRENT_LIST_DIR})

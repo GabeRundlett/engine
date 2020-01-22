@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../dep/math/src/math.hpp"
+#include "Math.hpp"
 
-namespace coel {
+namespace Coel {
     struct KeyPress {
         int key, scancode, mods;
     };
@@ -20,17 +20,17 @@ namespace coel {
         int button, mods;
     };
     struct MouseScroll {
-        double x, y;
+        Math::Vec2d offset;
     };
     struct MouseMove {
-        double x, y;
+        Math::Vec2d offset;
     };
 
     struct WindowMove {
-        int x, y;
+        Math::Vec2i offset;
     };
     struct WindowResize {
-        int width, height;
+        Math::Vec2i size;
     };
     struct WindowClose {};
     struct WindowFocus {};
@@ -203,4 +203,4 @@ namespace coel {
         virtual void window_defocus(const WindowDefocus &e) {}
         virtual void window_close(const WindowClose &e) {}
     };
-} // namespace coel
+} // namespace Coel

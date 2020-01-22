@@ -1,11 +1,15 @@
 Language: Cpp
 BasedOnStyle: LLVM
+
 IndentWidth: 4
-AccessModifierOffset: -2
+ColumnLimit: 128
+
+SortIncludes: false
 SortUsingDeclarations: false
+
+NamespaceIndentation: All
+CompactNamespaces: true
+
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortBlocksOnASingleLine: true
-NamespaceIndentation: All
-CompactNamespaces: true
-ColumnLimit: 128
