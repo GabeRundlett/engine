@@ -52,16 +52,16 @@ namespace Coel { namespace Windows {
         glfwSetKeyCallback(mWindow, [](GLFWwindow *w, int key, int scancode, int action, int mods) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
             switch (action) {
-            case GLFWPress: window->mKeyPressCallback({key, scancode, mods}); break;
-            case GLFWRepeat: window->mKeyRepeatCallback({key, scancode, mods}); break;
-            case GLFWRelease: window->mKeyReleaseCallback({key, scancode, mods}); break;
+            case GLFW_PRESS: window->mKeyPressCallback({key, scancode, mods}); break;
+            case GLFW_REPEAT: window->mKeyRepeatCallback({key, scancode, mods}); break;
+            case GLFW_RELEASE: window->mKeyReleaseCallback({key, scancode, mods}); break;
             }
         });
         glfwSetMouseButtonCallback(mWindow, [](GLFWwindow *w, int button, int action, int mods) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
             switch (action) {
-            case GLFWPress: window->mMousePressCallback({button, mods}); break;
-            case GLFWRelease: window->mMouseReleaseCallback({button, mods}); break;
+            case GLFW_PRESS: window->mMousePressCallback({button, mods}); break;
+            case GLFW_RELEASE: window->mMouseReleaseCallback({button, mods}); break;
             }
         });
         glfwSetCursorPosCallback(mWindow, [](GLFWwindow *w, double xPos, double yPos) {

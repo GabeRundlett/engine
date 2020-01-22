@@ -25,9 +25,9 @@ namespace Coel {
 
     template <typename... Args> static inline Scope<Context> createContext(Args... args) {
         switch (Renderer::getAPI()) {
-        case RendererAPI::OpenGL: return createScope<opengl::Context>(args...);
-        case RendererAPI::Vulkan:
-        case RendererAPI::Direct3D:
+        case RendererAPI::OPENGL: return createScope<Opengl::Context>(args...);
+        case RendererAPI::VULKAN:
+        case RendererAPI::DIRECT3D:
         default: return nullptr;
         }
     }

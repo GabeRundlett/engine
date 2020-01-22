@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Math.hpp"
+#include <Math.hpp>
 
 namespace Coel {
     struct KeyPress {

@@ -35,6 +35,6 @@ elseif (UNIX)
 endif()
 
 add_library(Coelengine ${Sources} ${Headers})
-target_link_libraries(Coelengine PUBLIC glfw glad math stb)
+target_link_libraries(Coelengine PUBLIC glfw glad Math stb)
 target_compile_features(Coelengine PUBLIC cxx_std_17)
 target_include_directories(Coelengine PUBLIC ${CMAKE_CURRENT_LIST_DIR})
