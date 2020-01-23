@@ -13,12 +13,12 @@ namespace Coel { namespace Opengl {
 
         GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
     }
-    void set_clear_color(float r, float g, float b, float a) {
+    void setClearColor(float r, float g, float b, float a) {
         // DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glClearColor(r, g, b, a));
     }
-    void set_viewport(int x, int y, int width, int height) {
+    void setViewportSize(int x, int y, int width, int height) {
         // DEBUG_BEGIN_FUNC_PROFILE;
 
         GL_CALL(glViewport(x, y, width, height));

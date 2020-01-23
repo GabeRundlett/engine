@@ -78,7 +78,7 @@ namespace Coel { namespace Windows {
         });
         glfwSetWindowSizeCallback(mWindow, [](GLFWwindow *w, int width, int height) {
             Window *const window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(w));
-            Renderer::set_viewport(0, 0, width, height);
+            Renderer::setViewportSize(0, 0, width, height);
             window->mWidth = width, window->mHeight = height;
             window->mWindowResizeCallback({width, height});
         });

@@ -34,7 +34,7 @@ namespace Coel {
             default: break;
             }
         }
-        static inline void set_clear_color(float r, float g, float b, float a) {
+        static inline void setClearColor(float r, float g, float b, float a) {
             switch (sRendererAPI) {
             case RendererAPI::NONE:
             case RendererAPI::OPENGL: Opengl::setClearColor(r, g, b, a); break;
@@ -43,7 +43,7 @@ namespace Coel {
             default: break;
             }
         }
-        static inline void set_viewport(int x, int y, int width, int height) {
+        static inline void setViewportSize(int x, int y, int width, int height) {
             switch (sRendererAPI) {
             case RendererAPI::NONE:
             case RendererAPI::OPENGL: Opengl::setViewportSize(x, y, width, height); break;
