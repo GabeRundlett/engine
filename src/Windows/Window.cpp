@@ -29,12 +29,8 @@ namespace Coel { namespace Windows {
           mMouseScrollCallback(defaultCallbacks::mouseScroll), mWindowMoveCallback(defaultCallbacks::windowMove),
           mWindowResizeCallback(defaultCallbacks::windowResize), mWindowFocusCallback(defaultCallbacks::windowFocus),
           mWindowDefocusCallback(defaultCallbacks::windowDefocus), mWindowCloseCallback(defaultCallbacks::windowClose) {
-
-        // DEBUG_BEGIN_FUNC_PROFILE;
-
         glfwInit();
         {
-            // DEBUG_BEGIN_PROFILE(glfwCreateWindow);
             mWindow = glfwCreateWindow(width, height, title, nullptr, nullptr);
             if (mWindow)
                 mFlags |= Flags::OPEN_STATUS;
@@ -97,31 +93,25 @@ namespace Coel { namespace Windows {
 
     Window::~Window() {}
 
-    bool Window::shouldClose() const {
-        // DEBUG_BEGIN_FUNC_PROFILE;
-
-        return glfwWindowShouldClose(mWindow);
-    }
+    bool Window::shouldClose() const { return glfwWindowShouldClose(mWindow); }
 
     void Window::update() {
-        // DEBUG_BEGIN_FUNC_PROFILE;
-
         mContext->swap();
         glfwPollEvents();
     }
 
-    void Window::bind() {
-        // DEBUG_BEGIN_FUNC_PROFILE;
-
-        mContext->bind();
-    }
+    void Window::bind() { mContext->bind(); }
 
     void Window::close() {
-        // DEBUG_BEGIN_FUNC_PROFILE;
-
         mFlags &= ~Flags::OPEN_STATUS;
         glfwDestroyWindow(mWindow);
     }
+
+    void Window::hideCursor(const bool val) const { glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL + val); }
+
+    void Window::setCursorPos(const Math::Vec2d &pos) const { glfwSetCursorPos(mWindow, pos.x, pos.y); }
+
+    double Window::getTime() const { return glfwGetTime(); }
 
     void Window::onKeyPress(void (*const f)(const KeyPress &)) { mKeyPressCallback = f; }
     void Window::onKeyRepeat(void (*const f)(const KeyRepeat &)) { mKeyRepeatCallback = f; }

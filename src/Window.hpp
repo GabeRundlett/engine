@@ -8,9 +8,15 @@ namespace Coel {
       public:
         virtual bool shouldClose() const = 0;
         virtual bool isOpen() const = 0;
+
         virtual void update() = 0;
         virtual void bind() = 0;
         virtual void close() = 0;
+
+        virtual void hideCursor(const bool val) const = 0;
+        virtual void setCursorPos(const Math::Vec2d &pos) const = 0;
+
+        virtual double getTime() const = 0;
 
         virtual void onKeyPress(void (*const f)(const KeyPress &)) = 0;
         virtual void onKeyRepeat(void (*const f)(const KeyRepeat &)) = 0;
@@ -57,11 +63,18 @@ namespace Coel { namespace Windows {
       public:
         Window(const int width, const int height, const char *const title);
         ~Window();
+
         bool shouldClose() const override;
         bool isOpen() const override { return mFlags | Flags::OPEN_STATUS; }
+
         void update() override;
         void bind() override;
         void close() override;
+
+        void hideCursor(const bool val) const override;
+        void setCursorPos(const Math::Vec2d &pos) const override;
+
+        double getTime() const override;
 
         void onKeyPress(void (*const f)(const KeyPress &)) override;
         void onKeyRepeat(void (*const f)(const KeyRepeat &)) override;
