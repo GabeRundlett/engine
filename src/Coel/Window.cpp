@@ -1,9 +1,11 @@
 #include <iostream>
-#include <GLFW/glfw3.h>
 
 #include "Window.hpp"
 #include "Renderer/Context.hpp"
 #include "Renderer/Command.hpp"
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 namespace Coel {
     static GLFWwindow *windowHandle;
@@ -31,7 +33,7 @@ namespace Coel {
             return -1;
         }
 
-        if (!Renderer::Context::init(windowHandle)) {
+        if (Renderer::Context::init(windowHandle)) {
             std::cerr << "Failed to create valid render context\n";
             deinit();
             return -1;
