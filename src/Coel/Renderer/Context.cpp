@@ -16,6 +16,14 @@ namespace Coel { namespace Renderer { namespace Context {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS); 
+
+        glEnable(GL_CULL_FACE);
+        glFrontFace(GL_CCW);
+        glCullFace(GL_BACK);
+
         return 0;
     }
 }}} // namespace Coel::Renderer::Context

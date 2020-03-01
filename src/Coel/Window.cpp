@@ -32,7 +32,6 @@ namespace Coel {
             deinit();
             return -1;
         }
-
         if (Renderer::Context::init(windowHandle)) {
             std::cerr << "Failed to create valid render context\n";
             deinit();
@@ -83,6 +82,11 @@ namespace Coel {
 
     double Window::getTime() const {
         return glfwGetTime(); //
+    }
+
+    void Window::cursorTo(const Math::Vec2d &pos) {
+        mouse.pos = pos;
+        glfwSetCursorPos(windowHandle, pos.x, pos.y);
     }
 
     void Window::deinit() {

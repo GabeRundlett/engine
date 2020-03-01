@@ -5,7 +5,7 @@
 
 namespace Coel {
     Texture::Texture(const char *const filepath) : m_format(0) {
-        stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(false);
         
         int channels;
         GLenum tStorageFormat = 0;
@@ -20,7 +20,7 @@ namespace Coel {
         glCreateTextures(GL_TEXTURE_2D, 1, &m_id);
         glTextureStorage2D(m_id, 1, tStorageFormat, m_width, m_height);
 
-        glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTextureParameteri(m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -36,7 +36,7 @@ namespace Coel {
         glCreateTextures(GL_TEXTURE_2D, 1, &m_id);
         glTextureStorage2D(m_id, 1, GL_RGBA8, m_width, m_height);
 
-        glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTextureParameteri(m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);

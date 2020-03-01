@@ -1,3 +1,7 @@
+#pragma once
+
+#include <Math.hpp>
+
 namespace Coel {
     namespace Key {
         enum KeyboardKeyID : const unsigned short {
@@ -167,4 +171,11 @@ namespace Coel {
             Repeat,
         };
     }
+    struct KeyInfo {
+        int code, action, mods;
+    };
+    struct MouseInfo {
+        Math::Vec2d pos;
+        int button, action, mods;
+    };
 } // namespace Coel

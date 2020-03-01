@@ -1,21 +1,15 @@
 #pragma once
 
 #include <Math.hpp>
+#include "Input.hpp"
 
 namespace Coel {
     class Window {
       public:
         Math::Vec2i size;
-
-        struct Mouse {
-            Math::Vec2d pos;
-            int button, action, mods;
-        } mouse;
-
-        struct Key {
-            int code, action, mods;
-        } key;
-
+        KeyInfo key;
+        MouseInfo mouse;
+        
         void (*onResize)(Window &w);
 
         void (*onMouseMove)(Window &w);
@@ -33,5 +27,6 @@ namespace Coel {
         void deinit();
 
         double getTime() const;
+        void cursorTo(const Math::Vec2d &pos);
     };
 } // namespace Coel

@@ -1,7 +1,9 @@
 
 add_library(Coelengine 
 	Coel/Window.cpp 
+	Coel/Camera.cpp 
 	Coel/Renderer/Batch2d.cpp 
+	Coel/Renderer/BatchText.cpp 
 	Coel/Renderer/Context.cpp 
 	Coel/Renderer/Command.cpp 
 	Coel/Renderer/Shader.cpp 

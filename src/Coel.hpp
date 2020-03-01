@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Coel/Window.hpp>
+#include <Coel/Camera.hpp>
 #include <Coel/Input.hpp>
 
 #include <Coel/Renderer/Renderer.hpp>

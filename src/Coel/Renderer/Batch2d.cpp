@@ -1,15 +1,19 @@
 #include "Renderer.hpp"
 #include <glad/glad.h>
 
+#include "Assets/Batch2dShader.hpp"
+
 namespace Coel { namespace Renderer {
-    Batch2d::Batch2d(unsigned int vCount, unsigned int iCount)
+    Batch2d::Batch2d(const char *const vsrc, const char *const fsrc, unsigned int vCount, unsigned int iCount)
         : m_vao(), m_vbo(nullptr, sizeof(Vertex) * vCount,
                          {{Element::F32, 2}, {Element::F32, 2}, {Element::F32, 2}, {Element::U8, 4}, {Element::U8, 4}}),
-          m_ibo(nullptr, sizeof(Index) * iCount), m_vertices(nullptr), m_indices(nullptr), m_vertexCount(0), m_indexCount(0),
+          m_ibo(nullptr, sizeof(Index) * iCount), m_shader(vsrc, fsrc), m_vertices(nullptr), m_indices(nullptr), m_vertexCount(0), m_indexCount(0),
           m_maxVertexCount(vCount), m_maxIndexCount(iCount), m_fillCol{0} {
         m_vao.add(m_vbo);
         init();
     }
+
+    Batch2d::Batch2d(unsigned int vCount, unsigned int iCount) : Batch2d::Batch2d(vertSrc, fragSrc, vCount, iCount) {}
 
     void Batch2d::init() {
         m_vbo.open(&m_vertices);
@@ -32,6 +36,7 @@ namespace Coel { namespace Renderer {
         m_vbo.close();
         m_ibo.close();
 
+        // m_shader.bind();
         m_vao.drawIndexed(m_indexCount);
 
         m_vbo.open(&m_vertices);
