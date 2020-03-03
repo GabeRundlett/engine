@@ -21,7 +21,7 @@ namespace Coel {
     Vbo::Vbo(void *data, unsigned int size, const Layout &l) : m_layout(l) {
         glCreateBuffers(1, &m_id);
         glBindBuffer(GL_ARRAY_BUFFER, m_id);
-        
+
         if (data) {
             glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
         } else {
@@ -51,7 +51,7 @@ namespace Coel {
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
-    Ibo::Ibo(unsigned short *data, unsigned int size) {
+    Ibo::Ibo(unsigned int *data, unsigned int size) {
         glCreateBuffers(1, &m_id);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
 
@@ -79,7 +79,6 @@ namespace Coel {
         bind();
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
     }
-
 
     Vao::Vao() : m_attribCount(0) {
         glGenVertexArrays(1, &m_id);
@@ -114,6 +113,6 @@ namespace Coel {
 
     void Vao::drawIndexed(unsigned int count) const {
         bind();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
     }
 } // namespace Coel

@@ -39,6 +39,7 @@ namespace Coel {
         }
 
         glfwSetWindowUserPointer(windowHandle, this);
+        // glfwSwapInterval(0);
 
         glfwSetWindowSizeCallback(windowHandle, [](GLFWwindow *glfwWindow, int w, int h) {
             Renderer::Command::resizeViewport(0, 0, w, h);

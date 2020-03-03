@@ -2,7 +2,7 @@
 
 namespace Coel {
     void Camera3D::resizeProjection(const Math::Vec2i &size) {
-        projMat = Math::Mat4::perspective(Math::HALF_PI, (float)size.x / size.y, 0.01f, 200.f);
+        projMat = Math::Mat4::perspective(70.f * Math::PI / 180, (float)size.x / size.y, 0.01f, 200.f);
     }
     void Camera3D::updateRotation(const Math::Vec3 &r) {
         rotMat = Math::Mat4::identity();

@@ -43,7 +43,7 @@ namespace Coel {
 
       public:
         Ibo() = default;
-        Ibo(unsigned short *data, unsigned int size);
+        Ibo(unsigned int *data, unsigned int size);
         ~Ibo();
 
         void bind() const;

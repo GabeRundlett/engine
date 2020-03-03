@@ -25,7 +25,7 @@ namespace Coel { namespace Renderer {
             Math::Color fill, param;
         };
 
-        typedef unsigned short Index;
+        typedef unsigned int Index;
 
         Vertex *m_vertices;
         Index *m_indices;
