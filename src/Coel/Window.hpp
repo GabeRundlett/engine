@@ -9,7 +9,7 @@ namespace Coel {
         Math::Vec2i size;
         KeyInfo key;
         MouseInfo mouse;
-        
+
         void (*onResize)(Window &w);
 
         void (*onMouseMove)(Window &w);
@@ -25,6 +25,8 @@ namespace Coel {
         void update();
         bool isOpen() const;
         void deinit();
+        void close();
+        void resize();
 
         double getTime() const;
         void cursorTo(const Math::Vec2d &pos);

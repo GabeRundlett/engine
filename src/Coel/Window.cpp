@@ -93,4 +93,11 @@ namespace Coel {
     void Window::deinit() {
         glfwTerminate(); //
     }
+    void Window::close() {
+        glfwSetWindowShouldClose(windowHandle, true); //
+    }
+    void Window::resize() {
+        Renderer::Command::resizeViewport(0, 0, size.x, size.y);
+        onResize(*this);
+    }
 } // namespace Coel

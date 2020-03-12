@@ -22,6 +22,29 @@ namespace Coel {
         }
     };
 
+    struct Buffer {
+        enum Type {
+            None = 0,
+            Color = 1 << 0,
+            Depth = 1 << 1,
+            RenderDepth = 1 << 2,
+        };
+    };
+
+    class Fbo {
+        unsigned int m_id, m_colTexId, m_depTexId, m_depRboId, m_width, m_height;
+        unsigned char m_flags;
+
+      public:
+        Fbo(unsigned int width, unsigned int height, unsigned char flags);
+        ~Fbo();
+
+        void bind() const;
+        static void unbind();
+        void bindColorTexture(int slot) const;
+        void bindDepthTexture(int slot) const;
+    };
+
     class Vbo {
         unsigned int m_id;
 

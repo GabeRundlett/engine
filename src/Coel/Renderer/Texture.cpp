@@ -5,7 +5,7 @@
 
 namespace Coel {
     Texture::Texture(const char *const filepath) : m_format(0) {
-        stbi_set_flip_vertically_on_load(false);
+        stbi_set_flip_vertically_on_load(true);
         
         int channels;
         GLenum tStorageFormat = 0;
@@ -46,7 +46,9 @@ namespace Coel {
     }
 
     void Texture::bind(const int slot) const {
-        glBindTextureUnit(slot, m_id);
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_2D, m_id);
+        // glBindTextureUnit(slot, m_id);
     }
 
     void Texture::setData(const unsigned char *const data) const {
