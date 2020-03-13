@@ -5,10 +5,9 @@
 namespace Coel {
     struct Element {
         enum Type { F8, I8, U8, F16, I16, U16, F32, I32, U32, F64, I64, U64 };
-        Type type;
-        unsigned int count;
+        unsigned int type, count;
 
-        static inline constexpr unsigned int toSize(Type t) { return 1 << (t / 3); }
+        static inline constexpr unsigned int toSize(unsigned int t) { return 1 << (t / 3); }
         inline unsigned int getSize() const { return toSize(type) * count; }
     };
 

@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 
 namespace Coel {
-    static inline constexpr GLenum toOpenGLType(Element::Type t) {
+    static inline constexpr GLenum toOpenGLType(unsigned int t) {
         switch (t) {
         case Element::I8: return GL_BYTE;
         case Element::U8: return GL_UNSIGNED_BYTE;
@@ -37,7 +37,7 @@ namespace Coel {
             glTextureParameteri(m_colTexId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colTexId, 0);
         }
-        
+
         // Create a depth texture attachment
         if (flags & Buffer::Depth) {
             glGenTextures(1, &m_depTexId);
@@ -72,8 +72,7 @@ namespace Coel {
         glViewport(0, 0, m_width, m_height);
     }
 
-    void Fbo::unbind() {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+    void Fbo::unbind() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
     void Fbo::bindColorTexture(int slot) const {
         glActiveTexture(GL_TEXTURE0 + slot);

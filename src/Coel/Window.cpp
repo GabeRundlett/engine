@@ -2,7 +2,7 @@
 
 #include "Window.hpp"
 #include "Renderer/Context.hpp"
-#include "Renderer/Command.hpp"
+#include "Renderer/Renderer.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -12,7 +12,8 @@ namespace Coel {
     void dwc(Window &w) {} // default window callback
 
     Window::Window(int width, int height, const char *const title)
-        : size{width, height}, mouse{{0, 0}, 0, 0, 0}, onResize(dwc), onMouseMove(dwc), onMouseButton(dwc), onKey(dwc) {
+        : size{width, height}, mouse{{0, 0}, 0, 0, 0}, onResize(dwc), onMouseScroll(dwc), onMouseMove(dwc), onMouseButton(dwc),
+          onKey(dwc) {
         init(width, height, title); //
     }
 
@@ -39,10 +40,11 @@ namespace Coel {
         }
 
         glfwSetWindowUserPointer(windowHandle, this);
+        glfwSetInputMode(windowHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         // glfwSwapInterval(0);
 
         glfwSetWindowSizeCallback(windowHandle, [](GLFWwindow *glfwWindow, int w, int h) {
-            Renderer::Command::resizeViewport(0, 0, w, h);
+            Renderer::resizeViewport(0, 0, w, h);
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
             window->size = {w, h};
             window->onResize(*window);
@@ -52,6 +54,11 @@ namespace Coel {
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
             window->mouse.pos = {x, y};
             window->onMouseMove(*window);
+        });
+        glfwSetScrollCallback(windowHandle, [](GLFWwindow *glfwWindow, double x, double y) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->mouse.scrollOffset = {x, y};
+            window->onMouseScroll(*window);
         });
         glfwSetMouseButtonCallback(windowHandle, [](GLFWwindow *glfwWindow, int button, int action, int mods) {
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
@@ -90,6 +97,10 @@ namespace Coel {
         glfwSetCursorPos(windowHandle, pos.x, pos.y);
     }
 
+    void Window::cursorMode(const unsigned int mode) {
+        glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + mode); //
+    }
+
     void Window::deinit() {
         glfwTerminate(); //
     }
@@ -97,7 +108,8 @@ namespace Coel {
         glfwSetWindowShouldClose(windowHandle, true); //
     }
     void Window::resize() {
-        Renderer::Command::resizeViewport(0, 0, size.x, size.y);
+        Renderer::resizeViewport(0, 0, size.x, size.y);
         onResize(*this);
     }
+    GLFWwindow *Window::getGlfwWindow() { return windowHandle; }
 } // namespace Coel

@@ -1,4 +1,4 @@
-#include "Renderer.hpp"
+#include "BatchText.hpp"
 #include <glad/glad.h>
 #include <array>
 #include <algorithm>
@@ -83,7 +83,7 @@ namespace Coel { namespace Renderer {
         : m_vao(), m_vbo(nullptr, sizeof(Vertex) * vCount,
                          {{Element::F32, 2}, {Element::F32, 2}, {Element::F32, 2}, {Element::U8, 4}, {Element::U8, 4}}),
           m_ibo(nullptr, sizeof(Index) * iCount), m_shader(vertSrc, fragSrc),
-          m_texture("C:/Dev/Coel/Coelengine/src/Coel/Renderer/Assets/RobotoFontAtlas.png"), m_vertices(nullptr),
+          m_texture("C:/Dev/Coel/Coelengine/src/Coel/Renderers/Assets/RobotoFontAtlas.png"), m_vertices(nullptr),
           m_indices(nullptr), m_vertexCount(0), m_indexCount(0), m_maxVertexCount(vCount),
           m_maxIndexCount(iCount), m_fillCol{0} {
         m_vao.add(m_vbo);
@@ -103,7 +103,7 @@ namespace Coel { namespace Renderer {
             auto info = getCharInfo(c);
             Math::Vec2 tex = getCharTexCoord(info);
             Math::Vec2 size = getCharTexSize(info);
-            Math::Vec2 off =  getCharOffset(info) * s;
+            Math::Vec2 off = getCharOffset(info) * s;
             auto texSize = size / 1024;
             Math::Vec2 pos{x + cursorOff, y};
             pos += off;

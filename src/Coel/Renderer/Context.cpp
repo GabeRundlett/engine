@@ -14,8 +14,6 @@ namespace Coel { namespace Renderer { namespace Context {
             return -1;
         }
 
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
         return 0;
     }
 }}} // namespace Coel::Renderer::Context

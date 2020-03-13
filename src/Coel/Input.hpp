@@ -175,7 +175,7 @@ namespace Coel {
         int code, action, mods;
     };
     struct MouseInfo {
-        Math::Vec2d pos;
+        Math::Vec2d pos, scrollOffset;
         int button, action, mods;
     };
 } // namespace Coel

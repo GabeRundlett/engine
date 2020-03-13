@@ -6,6 +6,7 @@ if (NOT TARGET Coelengine)
     add_subdirectory(dep/glfw)
     add_subdirectory(dep/glad)
     add_subdirectory(dep/Math)
+    add_subdirectory(dep/imgui)
     add_subdirectory(dep/stb)
 
     add_subdirectory(src)
