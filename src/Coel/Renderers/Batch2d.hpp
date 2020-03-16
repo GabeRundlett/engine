@@ -4,7 +4,7 @@
 #include <Coel/Renderer/Shader.hpp>
 #include <Coel/Renderer/Texture.hpp>
 
-#include <Math.hpp>
+#include <glm/glm.hpp>
 
 namespace Coel { namespace Renderer {
     class Batch2d final {
@@ -12,30 +12,31 @@ namespace Coel { namespace Renderer {
         Vbo m_vbo;
         Ibo m_ibo;
         Shader m_shader;
+        Shader::Uniform<glm::ivec2> m_viewPosUniform, m_viewSizeUniform;
 
         struct Vertex {
-            Math::Vec2 pos, tex, size;
-            Math::Color fill, param;
+            glm::vec2 pos, tex, size;
+            glm::u8vec4 fill, param;
         };
 
         typedef unsigned int Index;
 
-        Vertex *m_vertices;
-        Index *m_indices;
+        Vertex *m_vertices{};
+        Index *m_indices{};
 
         struct Quad {
-            const Math::Vec2 p1, p2, t1, t2;
-            const Math::Color param;
+            const glm::vec2 p1, p2, t1, t2;
+            const glm::u8vec4 param;
         };
 
-        unsigned int m_vertexCount, m_indexCount, m_maxVertexCount, m_maxIndexCount;
+        unsigned int m_vertexCount{}, m_indexCount{}, m_maxVertexCount, m_maxIndexCount;
         float m_strokeWeight;
-        Math::Color m_fillCol;
+        glm::u8vec4 m_fillCol;
 
         inline void submitQuad(const Quad &q) {
             if (m_vertexCount + 4 > m_maxVertexCount || m_indexCount + 6 > m_maxIndexCount) flush();
 
-            Math::Vec2 p1 = q.p1, p2 = q.p2, t1 = q.t1, t2 = q.t1;
+            glm::vec2 p1 = q.p1, p2 = q.p2, t1 = q.t1, t2 = q.t1;
 
             if (q.p1.x > p2.x)
                 p1.x = q.p2.x, p2.x = q.p1.x, t1.x = q.t2.x, t2.x = q.t1.x;
@@ -46,10 +47,10 @@ namespace Coel { namespace Renderer {
             else
                 p1.y = q.p1.y, p2.y = q.p2.y, t1.y = q.t1.y, t2.y = q.t2.y;
 
-            p1 -= {(float)q.param.g, (float)q.param.g};
-            p2 += {(float)q.param.g, (float)q.param.g};
+            p1 -= glm::vec2{(float)q.param.g, (float)q.param.g};
+            p2 += glm::vec2{(float)q.param.g, (float)q.param.g};
 
-            const Math::Vec2 size = p2 - p1;
+            const glm::vec2 size = p2 - p1;
 
             struct QuadVBO {
                 Vertex a, b, c, d;
@@ -71,28 +72,6 @@ namespace Coel { namespace Renderer {
 
             m_vertices += 4, m_indices += 6;
             m_vertexCount += 4, m_indexCount += 6;
-
-            /*
-            m_vertices->x = x;
-            m_vertices->y = y;
-            ++m_vertices;
-            m_vertices->x = x;
-            m_vertices->y = y + h;
-            ++m_vertices;
-            m_vertices->x = x + w;
-            m_vertices->y = y;
-            ++m_vertices;
-            m_vertices->x = x + w;
-            m_vertices->y = y + h;
-            ++m_vertices;
-
-            *m_indices = 0;
-            *++m_indices = 1;
-            *++m_indices = 2;
-            *++m_indices = 1;
-            *++m_indices = 3;
-            *++m_indices = 2;
-            */
         }
 
       public:
@@ -106,9 +85,9 @@ namespace Coel { namespace Renderer {
         void submitRect(float x, float y, float w, float h);
         void submitLine(float x1, float y1, float x2, float y2);
         void submitEllipse(float x, float y, float rx, float ry);
-        void fill(const Math::Color &c);
+        void fill(const glm::u8vec4 &c);
         void strokeWeight(const float weight);
 
-        void resize(const Math::Vec2i &pos, const Math::Vec2i &size);
+        void resize(const glm::ivec2 &pos, const glm::ivec2 &size);
     };
 }} // namespace Coel::Renderer

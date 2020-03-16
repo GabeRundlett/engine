@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Math.hpp>
+#include <glm/glm.hpp>
 
 namespace Coel {
     namespace Key {
@@ -175,7 +175,7 @@ namespace Coel {
         int code, action, mods;
     };
     struct MouseInfo {
-        Math::Vec2d pos, scrollOffset;
+        glm::dvec2 pos, scrollOffset;
         int button, action, mods;
     };
 } // namespace Coel

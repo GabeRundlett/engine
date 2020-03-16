@@ -12,8 +12,8 @@ namespace Coel {
     void dwc(Window &w) {} // default window callback
 
     Window::Window(int width, int height, const char *const title)
-        : size{width, height}, mouse{{0, 0}, 0, 0, 0}, onResize(dwc), onMouseScroll(dwc), onMouseMove(dwc), onMouseButton(dwc),
-          onKey(dwc) {
+        : size{width, height}, mouse{{0, 0}, {0, 0}, 0, 0, 0}, onResize(dwc), onMouseScroll(dwc), onMouseMove(dwc),
+          onMouseButton(dwc), onKey(dwc) {
         init(width, height, title); //
     }
 
@@ -92,7 +92,7 @@ namespace Coel {
         return glfwGetTime(); //
     }
 
-    void Window::cursorTo(const Math::Vec2d &pos) {
+    void Window::cursorTo(const glm::dvec2 &pos) {
         mouse.pos = pos;
         glfwSetCursorPos(windowHandle, pos.x, pos.y);
     }

@@ -67,15 +67,15 @@ static auto getCharInfo(unsigned char c) {
 }
 
 static inline auto getCharTexCoord(const FontAtlasInfo &info) {
-    return Math::Vec2{(float)info.x, (float)info.y} * 1.f / 1024; //
+    return glm::vec2{(float)info.x, (float)info.y} * glm::vec2{1.f / 1024}; //
 }
 
 static inline auto getCharTexSize(const FontAtlasInfo &info) {
-    return Math::Vec2{(float)info.width, (float)info.height}; //
+    return glm::vec2{(float)info.width, (float)info.height}; //
 }
 
 static inline auto getCharOffset(const FontAtlasInfo &info) {
-    return Math::Vec2{(float)info.xoffset, (float)info.yoffset}; //
+    return glm::vec2{(float)info.xoffset, (float)info.yoffset}; //
 }
 
 namespace Coel { namespace Renderer {
@@ -101,11 +101,11 @@ namespace Coel { namespace Renderer {
         float cursorOff = 0.f;
         for (const auto &c : str) {
             auto info = getCharInfo(c);
-            Math::Vec2 tex = getCharTexCoord(info);
-            Math::Vec2 size = getCharTexSize(info);
-            Math::Vec2 off = getCharOffset(info) * s;
-            auto texSize = size / 1024;
-            Math::Vec2 pos{x + cursorOff, y};
+            glm::vec2 tex = getCharTexCoord(info);
+            glm::vec2 size = getCharTexSize(info);
+            glm::vec2 off = getCharOffset(info) * s;
+            auto texSize = size * glm::vec2{1.f / 1024};
+            glm::vec2 pos{x + cursorOff, y};
             pos += off;
             submitQuad({pos, pos + size * s, tex, tex + texSize, {0, 0, 0, 0}});
             cursorOff += info.xadvance * s;
@@ -125,9 +125,7 @@ namespace Coel { namespace Renderer {
         m_vertexCount = 0, m_indexCount = 0;
     }
 
-    void BatchText::resize(const Math::Vec2i &size) {
-        m_shader.sendInt2("size", &size); //
-    }
+    void BatchText::resize(const glm::ivec2 &size) {}
 
-    void BatchText::fill(const Math::Color &c) { m_fillCol = c; }
+    void BatchText::fill(const glm::u8vec4 &c) { m_fillCol = c; }
 }} // namespace Coel::Renderer

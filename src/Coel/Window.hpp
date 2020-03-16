@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Math.hpp>
+#include <glm/glm.hpp>
 #include "Input.hpp"
 
 struct GLFWwindow;
@@ -14,7 +14,7 @@ namespace Coel {
             Disabled,
         };
 
-        Math::Vec2i size;
+        glm::ivec2 size;
         KeyInfo key;
         MouseInfo mouse;
 
@@ -33,7 +33,7 @@ namespace Coel {
         void resize();
 
         double getTime() const;
-        void cursorTo(const Math::Vec2d &pos);
+        void cursorTo(const glm::dvec2 &pos);
         void cursorMode(const unsigned int mode);
         GLFWwindow *getGlfwWindow();
     };
