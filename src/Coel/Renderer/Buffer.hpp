@@ -21,26 +21,26 @@ namespace Coel {
         }
     };
 
-    struct Buffer {
-        enum Type {
-            None = 0,
-            Color = 1 << 0,
-            Depth = 1 << 1,
-            RenderDepth = 1 << 2,
-        };
-    };
+    namespace ColorBuffer {
+        enum Format { RGB8, RGB16, RGBA8, RGBA16, RED8, RED16 };
+    }
+
+    namespace DepthBuffer {
+        enum Format { None, Float16, Float32, RenderBuffer };
+    }
 
     class Fbo {
-        unsigned int m_id, m_colTexId, m_depTexId, m_depRboId, m_width, m_height;
-        unsigned char m_flags;
+        unsigned int m_id, m_colTexId[4], m_depTexId, m_depRboId, m_width, m_height;
+        unsigned char m_colorAttachments[4], m_colorAttachmentCount, m_depthAttachment;
 
       public:
-        Fbo(unsigned int width, unsigned int height, unsigned char flags);
+        Fbo(unsigned int width, unsigned int height, const std::initializer_list<unsigned char> &colorAttachments,
+            const unsigned char depthAttachment = DepthBuffer::RenderBuffer);
         ~Fbo();
 
         void bind() const;
         static void unbind();
-        void bindColorTexture(int slot) const;
+        void bindColorAttachmentTexture(int attachment, int slot) const;
         void bindDepthTexture(int slot) const;
     };
 

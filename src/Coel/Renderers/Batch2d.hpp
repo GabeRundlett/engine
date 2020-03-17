@@ -34,7 +34,10 @@ namespace Coel { namespace Renderer {
         glm::u8vec4 m_fillCol;
 
         inline void submitQuad(const Quad &q) {
-            if (m_vertexCount + 4 > m_maxVertexCount || m_indexCount + 6 > m_maxIndexCount) flush();
+            if (m_vertexCount + 4 > m_maxVertexCount || m_indexCount + 6 > m_maxIndexCount) {
+                flush();
+                begin();
+            }
 
             glm::vec2 p1 = q.p1, p2 = q.p2, t1 = q.t1, t2 = q.t1;
 
@@ -79,7 +82,7 @@ namespace Coel { namespace Renderer {
         Batch2d(unsigned int vCount = 10000, unsigned int iCount = 10000);
         ~Batch2d() = default;
 
-        void init();
+        void begin();
         void flush();
 
         void submitRect(float x, float y, float w, float h);

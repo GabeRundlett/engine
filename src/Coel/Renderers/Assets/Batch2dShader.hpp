@@ -53,7 +53,7 @@ void main() {
 
 	switch(v_material) {
 	case 0:
-		color = vec4(1, 0, 1, 1);
+		color = v_col;
 		break;
 	case 1: {
 		vec2 size = abs(v_size);

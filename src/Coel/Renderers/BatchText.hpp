@@ -13,6 +13,8 @@ namespace Coel { namespace Renderer {
         Vbo m_vbo;
         Ibo m_ibo;
         Shader m_shader;
+        Shader::Uniform<glm::ivec2> m_viewPosUniform, m_viewSizeUniform;
+
         Texture m_texture;
 
         struct Vertex {
@@ -20,21 +22,25 @@ namespace Coel { namespace Renderer {
             glm::u8vec4 fill, param;
         };
 
-        typedef unsigned short Index;
+        typedef unsigned int Index;
 
-        Vertex *m_vertices;
-        Index *m_indices;
+        Vertex *m_vertices{};
+        Index *m_indices{};
 
         struct Quad {
             const glm::vec2 p1, p2, t1, t2;
             const glm::u8vec4 param;
         };
 
-        unsigned int m_vertexCount, m_indexCount, m_maxVertexCount, m_maxIndexCount;
+        unsigned int m_vertexCount{}, m_indexCount{}, m_maxVertexCount, m_maxIndexCount;
+        float m_strokeWeight;
         glm::u8vec4 m_fillCol;
 
         inline void submitQuad(const Quad &q) {
-            if (m_vertexCount + 4 > m_maxVertexCount || m_indexCount + 6 > m_maxIndexCount) flush();
+            if (m_vertexCount + 4 > m_maxVertexCount || m_indexCount + 6 > m_maxIndexCount) {
+                flush();
+                begin();
+            }
 
             glm::vec2 p1 = q.p1, p2 = q.p2, t1 = q.t1, t2 = q.t1;
 
@@ -78,12 +84,12 @@ namespace Coel { namespace Renderer {
         BatchText(unsigned int vCount = 10000, unsigned int iCount = 10000);
         ~BatchText() = default;
 
-        void init();
+        void begin();
         void flush();
 
-        void submitText(float x, float y, float s, const std::string &str);
+        float submitText(float x, float y, float s, const std::string &str);
         void fill(const glm::u8vec4 &c);
 
-        void resize(const glm::ivec2 &size);
+        void resize(const glm::ivec2 &pos, const glm::ivec2 &size);
     };
 }} // namespace Coel::Renderer

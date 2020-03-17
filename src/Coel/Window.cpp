@@ -9,11 +9,11 @@
 
 namespace Coel {
     static GLFWwindow *windowHandle;
-    void dwc(Window &w) {} // default window callback
+    void dwc(Window &) {} // default window callback
 
     Window::Window(int width, int height, const char *const title)
-        : size{width, height}, mouse{{0, 0}, {0, 0}, 0, 0, 0}, onResize(dwc), onMouseScroll(dwc), onMouseMove(dwc),
-          onMouseButton(dwc), onKey(dwc) {
+        : size{width, height}, mouse{{0, 0}, {0, 0}, 0, 0, 0}, onMouseScroll(dwc), onMouseMove(dwc), onMouseButton(dwc),
+          onResize(dwc), onKey(dwc) {
         init(width, height, title); //
     }
 
@@ -68,13 +68,14 @@ namespace Coel {
             window->onMouseButton(*window);
         });
 
-        glfwSetKeyCallback(windowHandle, [](GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
-            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
-            window->key.code = key;
-            window->key.action = action;
-            window->key.mods = mods;
-            window->onKey(*window);
-        });
+        glfwSetKeyCallback(windowHandle,
+                           [](GLFWwindow *glfwWindow, int key, [[maybe_unused]] int scancode, int action, int mods) {
+                               Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+                               window->key.code = key;
+                               window->key.action = action;
+                               window->key.mods = mods;
+                               window->onKey(*window);
+                           });
 
         return 0;
     }

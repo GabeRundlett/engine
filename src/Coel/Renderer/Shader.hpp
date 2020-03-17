@@ -7,7 +7,7 @@ namespace Coel {
         unsigned int m_id;
 
       public:
-        template <typename T> struct Uniform final { int location{}; };
+        template <typename T> struct Uniform final { int location{}, count{1}; };
 
         Shader(const char *const vertSrc, const char *const fragSrc);
         Shader(const char *const vertSrc, const char *const geomSrc, const char *const fragSrc);
@@ -25,15 +25,16 @@ namespace Coel {
         Uniform<glm::mat3> findMat3(const char *const name) const;
         Uniform<glm::mat4> findMat4(const char *const name) const;
         void send(const Uniform<int> uniform, const int value) const;
+        void send(const Uniform<int> uniform, const int *const data) const;
         void send(const Uniform<glm::ivec2> uniform, const void *const data) const;
         void send(const Uniform<glm::ivec3> uniform, const void *const data) const;
         void send(const Uniform<glm::ivec4> uniform, const void *const data) const;
         void send(const Uniform<float> uniform, const float value) const;
+        void send(const Uniform<float> uniform, const float *const data) const;
         void send(const Uniform<glm::vec2> uniform, const void *const data) const;
         void send(const Uniform<glm::vec3> uniform, const void *const data) const;
         void send(const Uniform<glm::vec4> uniform, const void *const data) const;
         void send(const Uniform<glm::mat3> uniform, const void *const data) const;
         void send(const Uniform<glm::mat4> uniform, const void *const data) const;
     };
-
 } // namespace Coel

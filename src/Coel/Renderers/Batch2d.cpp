@@ -12,12 +12,12 @@ namespace Coel { namespace Renderer {
                                                                                         "viewportSize")},
           m_maxVertexCount(vCount), m_maxIndexCount(iCount), m_strokeWeight(4), m_fillCol{0} {
         m_vao.add(m_vbo);
-        init();
     }
 
     Batch2d::Batch2d(unsigned int vCount, unsigned int iCount) : Batch2d::Batch2d(vertSrc, fragSrc, vCount, iCount) {}
 
-    void Batch2d::init() {
+    void Batch2d::begin() {
+        m_vao.bind();
         m_vbo.open(&m_vertices);
         m_ibo.open(&m_indices);
     }
@@ -40,9 +40,6 @@ namespace Coel { namespace Renderer {
 
         m_shader.bind();
         m_vao.drawIndexed(m_indexCount);
-
-        m_vbo.open(&m_vertices);
-        m_ibo.open(&m_indices);
 
         m_vertexCount = 0, m_indexCount = 0;
     }

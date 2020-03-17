@@ -28,7 +28,7 @@ namespace Coel { namespace Renderer {
             glEnable(GL_CULL_FACE);
         else
             glDisable(GL_CULL_FACE);
-        glFrontFace(GL_CW);
+        glFrontFace(GL_CCW);
         glCullFace(GL_BACK);
     }
     void enableDepthTest(bool mode) {

@@ -14,56 +14,84 @@ namespace Coel {
         case Element::I32: return GL_INT;
         case Element::U32: return GL_UNSIGNED_INT;
         case Element::F64: return GL_DOUBLE;
-        default: return NULL;
+        default: return GL_FLOAT;
         }
     }
 
-    Fbo::Fbo(unsigned int width, unsigned int height, unsigned char flags) : m_width(width), m_height(height), m_flags(flags) {
+    static inline void toOpenGLColorFormat(unsigned char attachment, GLenum data[3]) {
+        switch (attachment) {
+        case ColorBuffer::RGB8: data[0] = GL_RGB8, data[1] = GL_RGB, data[2] = GL_UNSIGNED_BYTE; return;
+        case ColorBuffer::RGB16: data[0] = GL_RGB16, data[1] = GL_RGB, data[2] = GL_FLOAT; return;
+        case ColorBuffer::RGBA8: data[0] = GL_RGBA8, data[1] = GL_RGBA, data[2] = GL_UNSIGNED_BYTE; return;
+        case ColorBuffer::RGBA16: data[0] = GL_RGBA8, data[1] = GL_RGBA, data[2] = GL_FLOAT; return;
+        case ColorBuffer::RED8: data[0] = GL_RED, data[1] = GL_RED, data[2] = GL_UNSIGNED_BYTE; return;
+        case ColorBuffer::RED16: data[0] = GL_RED, data[1] = GL_RED, data[2] = GL_FLOAT; return;
+        }
+    }
+
+    Fbo::Fbo(unsigned int width, unsigned int height, const std::initializer_list<unsigned char> &colorAttachments,
+             const unsigned char depthAttachment)
+        : m_width(width), m_height(height), m_colorAttachmentCount(colorAttachments.size()),
+          m_depthAttachment(depthAttachment) {
         // Create the buffer
         glGenFramebuffers(1, &m_id);
         glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
+        if (m_colorAttachmentCount > 4) {
+            m_colorAttachmentCount = 0;
+            return;
+        }
+
         // Create a color texture attachment
-        if (flags & Buffer::Color) {
-            GLenum drawBuffers[]{GL_COLOR_ATTACHMENT0};
-            glDrawBuffers(1, drawBuffers);
+        if (m_colorAttachmentCount > 0) {
+            GLenum drawBuffers[4]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+            glDrawBuffers(m_colorAttachmentCount, drawBuffers);
 
-            glGenTextures(1, &m_colTexId);
-            glBindTexture(GL_TEXTURE_2D, m_colTexId);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-            glTextureParameteri(m_colTexId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTextureParameteri(m_colTexId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTextureParameteri(m_colTexId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTextureParameteri(m_colTexId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colTexId, 0);
+            for (unsigned int i = 0; i < m_colorAttachmentCount; ++i) {
+                glGenTextures(1, m_colTexId + i);
+                glBindTexture(GL_TEXTURE_2D, m_colTexId[i]);
+
+                GLenum formatData[3]{0, 0, 0};
+                m_colorAttachments[i] = colorAttachments.begin()[i];
+                toOpenGLColorFormat(m_colorAttachments[i], formatData);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, formatData[0], width, height, 0, formatData[1], formatData[2], nullptr);
+                glTextureParameteri(m_colTexId[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTextureParameteri(m_colTexId[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTextureParameteri(m_colTexId[i], GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTextureParameteri(m_colTexId[i], GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[i], GL_TEXTURE_2D, m_colTexId[i], 0);
+            }
         }
 
-        // Create a depth texture attachment
-        if (flags & Buffer::Depth) {
-            glGenTextures(1, &m_depTexId);
-            glBindTexture(GL_TEXTURE_2D, m_depTexId);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTextureParameteri(m_depTexId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTextureParameteri(m_depTexId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTextureParameteri(m_depTexId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTextureParameteri(m_depTexId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depTexId, 0);
-        }
-
-        // Create a depth render buffer
-        if (flags & Buffer::RenderDepth) {
+        if (m_depthAttachment == DepthBuffer::RenderBuffer) {
+            // Create a depth render buffer
             glGenRenderbuffers(1, &m_depRboId);
             glBindRenderbuffer(GL_RENDERBUFFER, m_depRboId);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depRboId);
-            // std::cout << "Created depth render buffer\n";
+        } else if (m_depthAttachment > DepthBuffer::None) {
+            // Create a depth texture attachment
+            glGenTextures(1, &m_depTexId);
+            glBindTexture(GL_TEXTURE_2D, m_depTexId);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTextureParameteri(m_depTexId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(m_depTexId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTextureParameteri(m_depTexId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTextureParameteri(m_depTexId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            float borderColor[]{1, 1, 1, 1};
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depTexId, 0);
         }
     }
 
     Fbo::~Fbo() {
-        if (m_flags & Buffer::RenderDepth) glDeleteRenderbuffers(1, &m_depRboId);
-        if (m_flags & Buffer::Depth) glDeleteTextures(1, &m_depTexId);
-        if (m_flags & Buffer::Color) glDeleteTextures(1, &m_colTexId);
+        if (m_depthAttachment == DepthBuffer::RenderBuffer)
+            glDeleteRenderbuffers(1, &m_depRboId);
+        else if (m_depthAttachment > DepthBuffer::None)
+            glDeleteTextures(1, &m_depTexId);
+        for (unsigned int i = 0; i < m_colorAttachmentCount; ++i)
+            glDeleteTextures(1, m_colTexId + i);
         glDeleteFramebuffers(1, &m_id);
     }
 
@@ -74,16 +102,14 @@ namespace Coel {
 
     void Fbo::unbind() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
-    void Fbo::bindColorTexture(int slot) const {
+    void Fbo::bindColorAttachmentTexture(int attachment, int slot) const {
         glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, m_colTexId);
-        // glBindTextureUnit(slot, m_colTexId);
+        glBindTexture(GL_TEXTURE_2D, m_colTexId[attachment]);
     }
 
     void Fbo::bindDepthTexture(int slot) const {
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, m_depTexId);
-        // glBindTextureUnit(slot, m_colTexId);
     }
 
     Vbo::Vbo(void *data, unsigned int size, const Layout &l) : m_layout(l) {

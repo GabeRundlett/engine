@@ -61,29 +61,35 @@ namespace Coel {
     Shader::Uniform<glm::mat4> Shader::findMat4(const char *const name) const { return {glGetUniformLocation(m_id, name)}; }
 
     void Shader::send(const Shader::Uniform<int> uniform, const int value) const { glUniform1i(uniform.location, value); }
+    void Shader::send(const Shader::Uniform<int> uniform, const int *const data) const {
+        glUniform1iv(uniform.location, uniform.count, data);
+    }
     void Shader::send(const Shader::Uniform<glm::ivec2> uniform, const void *const data) const {
-        glUniform2iv(uniform.location, 1, static_cast<const GLint *>(data));
+        glUniform2iv(uniform.location, uniform.count, static_cast<const GLint *>(data));
     }
     void Shader::send(const Shader::Uniform<glm::ivec3> uniform, const void *const data) const {
-        glUniform3iv(uniform.location, 1, static_cast<const GLint *>(data));
+        glUniform3iv(uniform.location, uniform.count, static_cast<const GLint *>(data));
     }
     void Shader::send(const Shader::Uniform<glm::ivec4> uniform, const void *const data) const {
-        glUniform4iv(uniform.location, 1, static_cast<const GLint *>(data));
+        glUniform4iv(uniform.location, uniform.count, static_cast<const GLint *>(data));
     }
     void Shader::send(const Shader::Uniform<float> uniform, const float value) const { glUniform1f(uniform.location, value); }
+    void Shader::send(const Shader::Uniform<float> uniform, const float *const data) const {
+        glUniform1fv(uniform.location, uniform.count, data);
+    }
     void Shader::send(const Shader::Uniform<glm::vec2> uniform, const void *const data) const {
-        glUniform2iv(uniform.location, 1, static_cast<const GLint *>(data));
+        glUniform2fv(uniform.location, uniform.count, static_cast<const GLfloat *>(data));
     }
     void Shader::send(const Shader::Uniform<glm::vec3> uniform, const void *const data) const {
-        glUniform3iv(uniform.location, 1, static_cast<const GLint *>(data));
+        glUniform3fv(uniform.location, uniform.count, static_cast<const GLfloat *>(data));
     }
     void Shader::send(const Shader::Uniform<glm::vec4> uniform, const void *const data) const {
-        glUniform4iv(uniform.location, 1, static_cast<const GLint *>(data));
+        glUniform4fv(uniform.location, uniform.count, static_cast<const GLfloat *>(data));
     }
     void Shader::send(const Shader::Uniform<glm::mat3> uniform, const void *const data) const {
-        glUniformMatrix3fv(uniform.location, 1, false, static_cast<const GLfloat *>(data));
+        glUniformMatrix3fv(uniform.location, uniform.count, false, static_cast<const GLfloat *>(data));
     }
     void Shader::send(const Shader::Uniform<glm::mat4> uniform, const void *const data) const {
-        glUniformMatrix4fv(uniform.location, 1, false, static_cast<const GLfloat *>(data));
+        glUniformMatrix4fv(uniform.location, uniform.count, false, static_cast<const GLfloat *>(data));
     }
 } // namespace Coel

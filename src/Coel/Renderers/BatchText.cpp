@@ -82,22 +82,21 @@ namespace Coel { namespace Renderer {
     BatchText::BatchText(unsigned int vCount, unsigned int iCount)
         : m_vao(), m_vbo(nullptr, sizeof(Vertex) * vCount,
                          {{Element::F32, 2}, {Element::F32, 2}, {Element::F32, 2}, {Element::U8, 4}, {Element::U8, 4}}),
-          m_ibo(nullptr, sizeof(Index) * iCount), m_shader(vertSrc, fragSrc),
-          m_texture("C:/Dev/Coel/Coelengine/src/Coel/Renderers/Assets/RobotoFontAtlas.png"), m_vertices(nullptr),
-          m_indices(nullptr), m_vertexCount(0), m_indexCount(0), m_maxVertexCount(vCount),
-          m_maxIndexCount(iCount), m_fillCol{0} {
+          m_ibo(nullptr, sizeof(Index) * iCount),
+          m_shader(vertSrc, fragSrc), m_viewPosUniform{m_shader.findInt2("viewportPos")}, m_viewSizeUniform{m_shader.findInt2(
+                                                                                              "viewportSize")},
+          m_texture("Assets/RobotoFontAtlas.png"), m_maxVertexCount(vCount), m_maxIndexCount(iCount),
+          m_strokeWeight(4), m_fillCol{0} {
         m_vao.add(m_vbo);
-        m_texture.bind(0);
-
-        init();
     }
 
-    void BatchText::init() {
+    void BatchText::begin() {
+        m_vao.bind();
         m_vbo.open(&m_vertices);
         m_ibo.open(&m_indices);
     }
 
-    void BatchText::submitText(float x, float y, float s, const std::string &str) {
+    float BatchText::submitText(float x, float y, float s, const std::string &str) {
         float cursorOff = 0.f;
         for (const auto &c : str) {
             auto info = getCharInfo(c);
@@ -110,6 +109,7 @@ namespace Coel { namespace Renderer {
             submitQuad({pos, pos + size * s, tex, tex + texSize, {0, 0, 0, 0}});
             cursorOff += info.xadvance * s;
         }
+        return cursorOff;
     }
 
     void BatchText::flush() {
@@ -117,15 +117,16 @@ namespace Coel { namespace Renderer {
         m_ibo.close();
 
         m_shader.bind();
+        m_texture.bind(0);
         m_vao.drawIndexed(m_indexCount);
-
-        m_vbo.open(&m_vertices);
-        m_ibo.open(&m_indices);
 
         m_vertexCount = 0, m_indexCount = 0;
     }
 
-    void BatchText::resize(const glm::ivec2 &size) {}
+    void BatchText::resize(const glm::ivec2 &pos, const glm::ivec2 &size) {
+        m_shader.send(m_viewPosUniform, &pos);
+        m_shader.send(m_viewSizeUniform, &size);
+    }
 
     void BatchText::fill(const glm::u8vec4 &c) { m_fillCol = c; }
 }} // namespace Coel::Renderer

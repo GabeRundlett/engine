@@ -5,21 +5,24 @@ static constexpr const char *const vertSrc = R"(
 
 layout (location = 0) in vec2 pos;
 layout (location = 1) in vec2 tex;
-layout (location = 2) in vec2 siz;
+layout (location = 2) in vec2 size;
 layout (location = 3) in vec4 col;
-layout (location = 4) in vec4 data;
+layout (location = 4) in vec4 param;
 
-uniform ivec2 size;
+uniform ivec2 viewportSize;
+uniform ivec2 viewportPos;
 
 out vec2 v_tex;
 out vec4 v_col;
 
 void main() {
+	vec2 v_pos = (pos - viewportPos) / viewportSize * 2 - 1;
+	v_pos.y *= -1;
+
 	v_tex = tex, v_col = col / 255;
-    v_tex.y = 1.f - v_tex.y;
-    vec2 p = pos / size * 2 - 1;
-    p.y *= -1;
-	gl_Position = vec4(p, 0, 1);
+    v_tex.y = 1 - v_tex.y;
+
+	gl_Position = vec4(v_pos, 0, 1);
 }
 )";
 
@@ -45,8 +48,7 @@ void main() {
     float sigDist = median(texVal.r, texVal.g, texVal.b);
     float w = fwidth(sigDist);
     float opacity = smoothstep(0.5 - w, 0.5 + w, sigDist);
-
 	color = v_col;
-    color.w *= clamp(opacity, 0.2f, 1.f);
+    color.w *= clamp(opacity, 0.f, 1.f);
 }
 )";
