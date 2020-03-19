@@ -43,6 +43,8 @@ namespace Coel {
         glfwSetInputMode(windowHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         // glfwSwapInterval(0);
 
+        glfwWindowHint(GLFW_SAMPLES, 4);
+
         glfwSetWindowSizeCallback(windowHandle, [](GLFWwindow *glfwWindow, int w, int h) {
             Renderer::resizeViewport(0, 0, w, h);
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));

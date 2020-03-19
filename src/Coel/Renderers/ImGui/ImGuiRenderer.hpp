@@ -7,6 +7,7 @@ namespace Coel { namespace Renderer {
     class ImGuiRenderer {
       public:
         ImGuiRenderer(Window &window);
+        ~ImGuiRenderer();
         void begin() const;
         void end(Window &window) const;
     };

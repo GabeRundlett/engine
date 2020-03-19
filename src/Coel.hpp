@@ -8,7 +8,7 @@
 #include <Coel/Renderers/Batch2d.hpp>
 #include <Coel/Renderers/Quad2d.hpp>
 #include <Coel/Renderers/BatchText.hpp>
-#include <Coel/Renderers/ImGui.hpp>
+#include <Coel/Renderers/ImGui/ImGuiRenderer.hpp>
 
 #include <Coel/Renderer/Renderer.hpp>
 #include <Coel/Renderer/Texture.hpp>
