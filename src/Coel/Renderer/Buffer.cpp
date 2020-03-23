@@ -20,10 +20,10 @@ namespace Coel {
 
     static inline void toOpenGLColorFormat(unsigned char attachment, GLenum data[3]) {
         switch (attachment) {
-        case ColorBuffer::RGB8: data[0] = GL_RGB8, data[1] = GL_RGB, data[2] = GL_UNSIGNED_BYTE; return;
-        case ColorBuffer::RGB16: data[0] = GL_RGB16, data[1] = GL_RGB, data[2] = GL_FLOAT; return;
-        case ColorBuffer::RGBA8: data[0] = GL_RGBA8, data[1] = GL_RGBA, data[2] = GL_UNSIGNED_BYTE; return;
-        case ColorBuffer::RGBA16: data[0] = GL_RGBA8, data[1] = GL_RGBA, data[2] = GL_FLOAT; return;
+        case ColorBuffer::RGB8: data[0] = GL_RGB, data[1] = GL_RGB, data[2] = GL_UNSIGNED_BYTE; return;
+        case ColorBuffer::RGB16: data[0] = GL_RGB16F, data[1] = GL_RGB, data[2] = GL_FLOAT; return;
+        case ColorBuffer::RGBA8: data[0] = GL_RGBA, data[1] = GL_RGBA, data[2] = GL_UNSIGNED_BYTE; return;
+        case ColorBuffer::RGBA16: data[0] = GL_RGBA16F, data[1] = GL_RGBA, data[2] = GL_FLOAT; return;
         case ColorBuffer::RED8: data[0] = GL_RED, data[1] = GL_RED, data[2] = GL_UNSIGNED_BYTE; return;
         case ColorBuffer::RED16: data[0] = GL_RED, data[1] = GL_RED, data[2] = GL_FLOAT; return;
         }
@@ -55,7 +55,7 @@ namespace Coel {
                 m_colorAttachments[i] = colorAttachments.begin()[i];
                 toOpenGLColorFormat(m_colorAttachments[i], formatData);
 
-                glTexImage2D(GL_TEXTURE_2D, 0, formatData[0], width, height, 0, formatData[1], formatData[2], nullptr);
+                glTexImage2D(GL_TEXTURE_2D, 0, formatData[1], width, height, 0, formatData[1], formatData[2], nullptr);
                 glTextureParameteri(m_colTexId[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTextureParameteri(m_colTexId[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTextureParameteri(m_colTexId[i], GL_TEXTURE_WRAP_S, GL_REPEAT);

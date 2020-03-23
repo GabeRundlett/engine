@@ -8,8 +8,8 @@ namespace Coel { namespace Renderer {
         : m_vao(), m_vbo(nullptr, sizeof(Vertex) * vCount,
                          {{Element::F32, 2}, {Element::F32, 2}, {Element::F32, 2}, {Element::U8, 4}, {Element::U8, 4}}),
           m_ibo(nullptr, sizeof(Index) * iCount),
-          m_shader(vsrc, fsrc), m_viewPosUniform{m_shader.findInt2("viewportPos")}, m_viewSizeUniform{m_shader.findInt2(
-                                                                                        "viewportSize")},
+          m_shader(vsrc, fsrc), m_viewPosUniform{m_shader.findFloat2("viewportPos")}, m_viewSizeUniform{m_shader.findFloat2(
+                                                                                          "viewportSize")},
           m_maxVertexCount(vCount), m_maxIndexCount(iCount), m_strokeWeight(4), m_fillCol{0} {
         m_vao.add(m_vbo);
     }
@@ -47,7 +47,7 @@ namespace Coel { namespace Renderer {
     void Batch2d::fill(const glm::u8vec4 &c) { m_fillCol = c; }
     void Batch2d::strokeWeight(const float weight) { m_strokeWeight = weight; }
 
-    void Batch2d::resize(const glm::ivec2 &pos, const glm::ivec2 &size) {
+    void Batch2d::resize(const glm::vec2 &pos, const glm::vec2 &size) {
         m_shader.send(m_viewPosUniform, &pos);
         m_shader.send(m_viewSizeUniform, &size);
     }

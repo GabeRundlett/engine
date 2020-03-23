@@ -12,7 +12,7 @@ namespace Coel { namespace Renderer {
         Vbo m_vbo;
         Ibo m_ibo;
         Shader m_shader;
-        Shader::Uniform<glm::ivec2> m_viewPosUniform, m_viewSizeUniform;
+        Shader::Uniform<glm::vec2> m_viewPosUniform, m_viewSizeUniform;
 
         struct Vertex {
             glm::vec2 pos, tex, size;
@@ -31,7 +31,7 @@ namespace Coel { namespace Renderer {
 
         unsigned int m_vertexCount{}, m_indexCount{}, m_maxVertexCount, m_maxIndexCount;
         float m_strokeWeight;
-        glm::u8vec4 m_fillCol;
+        glm::u8vec4 m_fillCol{255, 0, 255, 255};
 
         inline void submitQuad(const Quad &q) {
             if (m_vertexCount + 4 > m_maxVertexCount || m_indexCount + 6 > m_maxIndexCount) {
@@ -91,6 +91,6 @@ namespace Coel { namespace Renderer {
         void fill(const glm::u8vec4 &c);
         void strokeWeight(const float weight);
 
-        void resize(const glm::ivec2 &pos, const glm::ivec2 &size);
+        void resize(const glm::vec2 &pos, const glm::vec2 &size);
     };
 }} // namespace Coel::Renderer

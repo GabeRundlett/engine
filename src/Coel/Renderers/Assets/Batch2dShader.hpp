@@ -9,8 +9,8 @@ layout (location = 2) in vec2 size;
 layout (location = 3) in vec4 col;
 layout (location = 4) in vec4 param;
 
-uniform ivec2 viewportSize;
-uniform ivec2 viewportPos;
+uniform vec2 viewportSize;
+uniform vec2 viewportPos;
 
 out vec2 v_pos;
 out vec2 v_tex;
