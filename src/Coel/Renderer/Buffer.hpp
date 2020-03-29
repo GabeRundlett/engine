@@ -22,7 +22,7 @@ namespace Coel {
     };
 
     namespace ColorBuffer {
-        enum Format { RGB8, RGB16, RGBA8, RGBA16, RED8, RED16 };
+        enum Format { RGB8, RGB16, RGBA8, RGBA16, Float };
     }
 
     namespace DepthBuffer {

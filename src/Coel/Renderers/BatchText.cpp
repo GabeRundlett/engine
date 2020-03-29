@@ -88,6 +88,9 @@ namespace Coel { namespace Renderer {
           m_texture("Assets/RobotoFontAtlas.png"), m_maxVertexCount(vCount), m_maxIndexCount(iCount),
           m_strokeWeight(4), m_fillCol{0} {
         m_vao.add(m_vbo);
+        m_texture.setMagFilter(Filter::Linear);
+        m_texture.setMinFilter(Filter::Linear);
+        m_texture.setWrap(Wrap::ClampToEdge);
     }
 
     void BatchText::begin() {

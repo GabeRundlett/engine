@@ -19,7 +19,7 @@ namespace Coel { namespace Renderer {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
         // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
         // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-        io.Fonts->AddFontFromFileTTF("Assets/Roboto-Regular.ttf", 36.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+        io.Fonts->AddFontFromFileTTF("Assets/Roboto-Regular.ttf", 14.0f, NULL, io.Fonts->GetGlyphRangesDefault());
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
@@ -28,7 +28,7 @@ namespace Coel { namespace Renderer {
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         ImGuiStyle &style = ImGui::GetStyle();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            style.WindowRounding = 12.f;
+            style.WindowRounding = 0.f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
