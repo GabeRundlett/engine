@@ -33,7 +33,7 @@ namespace Coel { namespace Renderer {
         }
 
         // Setup Platform/Renderer bindings
-        ImGui_ImplGlfw_InitForOpenGL(window.getGlfwWindow(), true);
+        ImGui_ImplGlfw_InitForOpenGL(window.glfwHandle, true);
         ImGui_ImplOpenGL3_Init("#version 410");
     }
 

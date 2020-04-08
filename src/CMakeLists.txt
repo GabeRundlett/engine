@@ -9,10 +9,11 @@ add_library(Coelengine
 	Coel/Renderer/Shader.cpp 
 	Coel/Renderer/Texture.cpp 
 	Coel/Renderer/Buffer.cpp
+	Coel/Renderer/Batch.cpp
 	
-	Coel/Renderers/Batch2d.cpp 
 	Coel/Renderers/Quad2d.cpp 
-	Coel/Renderers/BatchText.cpp
+	Coel/Renderers/Batch2d.cpp 
+	# Coel/Renderers/BatchText.cpp
 
 	Coel/Renderers/ImGui/ImGuiRenderer.cpp 
 	Coel/Renderers/ImGui/imgui_impl_glfw.cpp 

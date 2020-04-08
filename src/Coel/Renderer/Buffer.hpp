@@ -3,8 +3,8 @@
 #include <vector>
 
 namespace Coel {
+    enum Type { F8, I8, U8, F16, I16, U16, F32, I32, U32, F64, I64, U64 };
     struct Element {
-        enum Type { F8, I8, U8, F16, I16, U16, F32, I32, U32, F64, I64, U64 };
         unsigned int type, count;
 
         static inline constexpr unsigned int toSize(unsigned int t) { return 1 << (t / 3); }
@@ -12,10 +12,10 @@ namespace Coel {
     };
 
     struct Layout {
-        std::vector<Element> elements;
-        unsigned int stride;
+        std::vector<Element> elements{};
+        unsigned int stride{};
 
-        Layout(const std::initializer_list<Element> &elem) : elements(elem), stride(0) {
+        Layout(const std::initializer_list<Element> &elem) : elements(elem) {
             for (const auto elem : elements)
                 stride += elem.getSize();
         }
@@ -44,46 +44,34 @@ namespace Coel {
         void bindDepthTexture(int slot) const;
     };
 
-    class Vbo {
-        unsigned int m_id;
-
-      public:
-        Layout m_layout;
-
-        Vbo() = default;
-        Vbo(void *data, unsigned int size, const Layout &l = {});
-        ~Vbo();
-
-        void bind() const;
-        void setLayout(const Layout &l);
-        void open(void *handle) const;
-        void close() const;
+    struct Vbo {
+        Layout layout{};
+        unsigned int id{};
     };
 
-    class Ibo {
-        unsigned int m_id;
+    void create(Vbo &vbo, void *data, unsigned int size);
+    void destroy(Vbo &vbo);
+    void bind(const Vbo &vbo);
+    void setLayout(Vbo &vbo, const Layout &l);
+    void open(const Vbo &vbo, void *handle);
+    void close(const Vbo &vbo);
 
-      public:
-        Ibo() = default;
-        Ibo(unsigned int *data, unsigned int size);
-        ~Ibo();
-
-        void bind() const;
-        void open(void *handle) const;
-        void close() const;
+    struct Ibo {
+        unsigned int id{};
     };
 
-    class Vao {
-        unsigned int m_id, m_attribCount;
+    void create(Ibo &ibo, void *data, unsigned int size);
+    void destroy(Ibo &ibo);
+    void bind(const Ibo &ibo);
+    void open(const Ibo &ibo, void *handle);
+    void close(const Ibo &ibo);
 
-      public:
-        Vao();
-        ~Vao();
-
-        void bind() const;
-        void add(const Vbo &v);
-
-        void draw(unsigned int count) const;
-        void drawIndexed(unsigned int count) const;
+    struct Vao {
+        unsigned int id{}, attribCount{};
     };
+
+    void create(Vao &vao);
+    void destroy(Vao &vao);
+    void bind(const Vao &vao);
+    void link(Vao &vao, const Vbo &vbo);
 } // namespace Coel

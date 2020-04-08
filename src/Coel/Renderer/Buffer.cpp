@@ -5,15 +5,15 @@
 namespace Coel {
     static inline constexpr GLenum toOpenGLType(unsigned int t) {
         switch (t) {
-        case Element::I8: return GL_BYTE;
-        case Element::U8: return GL_UNSIGNED_BYTE;
-        case Element::F16: return GL_HALF_FLOAT;
-        case Element::I16: return GL_SHORT;
-        case Element::U16: return GL_UNSIGNED_SHORT;
-        case Element::F32: return GL_FLOAT;
-        case Element::I32: return GL_INT;
-        case Element::U32: return GL_UNSIGNED_INT;
-        case Element::F64: return GL_DOUBLE;
+        case I8: return GL_BYTE;
+        case U8: return GL_UNSIGNED_BYTE;
+        case F16: return GL_HALF_FLOAT;
+        case I16: return GL_SHORT;
+        case U16: return GL_UNSIGNED_SHORT;
+        case F32: return GL_FLOAT;
+        case I32: return GL_INT;
+        case U32: return GL_UNSIGNED_INT;
+        case F64: return GL_DOUBLE;
         default: return GL_FLOAT;
         }
     }
@@ -111,9 +111,9 @@ namespace Coel {
         glBindTexture(GL_TEXTURE_2D, m_depTexId);
     }
 
-    Vbo::Vbo(void *data, unsigned int size, const Layout &l) : m_layout(l) {
-        glCreateBuffers(1, &m_id);
-        glBindBuffer(GL_ARRAY_BUFFER, m_id);
+    void create(Vbo &vbo, void *data, unsigned int size) {
+        glCreateBuffers(1, &vbo.id);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
 
         if (data) {
             glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
@@ -121,32 +121,27 @@ namespace Coel {
             glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
         }
     }
-
-    Vbo::~Vbo() {
-        glDeleteBuffers(1, &m_id); //
+    void destroy(Vbo &vbo) {
+        glDeleteBuffers(1, &vbo.id); //
     }
-
-    void Vbo::bind() const {
-        glBindBuffer(GL_ARRAY_BUFFER, m_id); //
+    void bind(const Vbo &vbo) {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo.id); //
     }
-
-    void Vbo::setLayout(const Layout &l) {
-        m_layout = l; //
+    void setLayout(Vbo &vbo, const Layout &l) {
+        vbo.layout = l; //
     }
-
-    void Vbo::open(void *handle) const {
-        bind();
+    void open(const Vbo &vbo, void *handle) {
+        bind(vbo);
         *reinterpret_cast<void **>(handle) = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     }
-
-    void Vbo::close() const {
-        bind();
+    void close(const Vbo &vbo) {
+        bind(vbo);
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
-    Ibo::Ibo(unsigned int *data, unsigned int size) {
-        glCreateBuffers(1, &m_id);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
+    void create(Ibo &ibo, void *data, unsigned int size) {
+        glCreateBuffers(1, &ibo.id);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo.id);
 
         if (data) {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
@@ -154,58 +149,45 @@ namespace Coel {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
         }
     }
-
-    Ibo::~Ibo() {
-        glDeleteBuffers(1, &m_id); //
+    void destroy(Ibo &ibo) {
+        glDeleteBuffers(1, &ibo.id); //
     }
-
-    void Ibo::bind() const {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id); //
+    void bind(const Ibo &ibo) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo.id); //
     }
-
-    void Ibo::open(void *handle) const {
-        bind();
+    void open(const Ibo &ibo, void *handle) {
+        bind(ibo);
         *reinterpret_cast<void **>(handle) = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
     }
 
-    void Ibo::close() const {
-        bind();
+    void close(const Ibo &ibo) {
+        bind(ibo);
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
     }
 
-    Vao::Vao() : m_attribCount(0) {
-        glGenVertexArrays(1, &m_id);
-        glBindVertexArray(m_id);
+    void create(Vao &vao) {
+        glGenVertexArrays(1, &vao.id);
+        glBindVertexArray(vao.id);
     }
 
-    Vao::~Vao() {
-        glDeleteVertexArrays(1, &m_id); //
+    void destroy(Vao &vao) {
+        glDeleteVertexArrays(1, &vao.id); //
     }
 
-    void Vao::bind() const {
-        glBindVertexArray(m_id); //
+    void bind(const Vao &vao) {
+        glBindVertexArray(vao.id); //
     }
 
-    void Vao::add(const Vbo &v) {
-        glBindVertexArray(m_id);
-        v.bind();
+    void link(Vao &vao, const Vbo &vbo) {
+        bind(vao);
+        bind(vbo);
         unsigned char *offset = nullptr;
-        for (const auto elem : v.m_layout.elements) {
-            glEnableVertexAttribArray(m_attribCount);
-            glVertexAttribPointer(m_attribCount, static_cast<GLint>(elem.count), toOpenGLType(elem.type), GL_FALSE,
-                                  static_cast<GLsizei>(v.m_layout.stride), offset);
+        for (const auto elem : vbo.layout.elements) {
+            glEnableVertexAttribArray(vao.attribCount);
+            glVertexAttribPointer(vao.attribCount, static_cast<GLint>(elem.count), toOpenGLType(elem.type), GL_FALSE,
+                                  static_cast<GLsizei>(vbo.layout.stride), offset);
             offset += elem.getSize();
-            ++m_attribCount;
+            ++vao.attribCount;
         }
-    }
-
-    void Vao::draw(unsigned int count) const {
-        bind();
-        glDrawArrays(GL_TRIANGLES, 0, count);
-    }
-
-    void Vao::drawIndexed(unsigned int count) const {
-        bind();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
     }
 } // namespace Coel

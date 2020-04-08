@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include "Renderer.hpp"
 
 namespace Coel { namespace Renderer {
     void clear() {
@@ -43,5 +44,15 @@ namespace Coel { namespace Renderer {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    void draw(const Vao &vao, unsigned int count) {
+        bind(vao);
+        glDrawArrays(GL_TRIANGLES, 0, count);
+    }
+
+    void drawIndexed(const Vao &vao, unsigned int count) {
+        bind(vao);
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
     }
 }} // namespace Coel::Renderer

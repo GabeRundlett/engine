@@ -19,7 +19,7 @@ namespace Coel {
         if (temp == GL_FALSE) {
             temp = 0;
             glGetShaderiv(compiled_object_id, GL_INFO_LOG_LENGTH, &temp);
-            std::vector<char> infoLog(temp);
+            std::vector<char> infoLog(temp + 100);
             glGetShaderInfoLog(compiled_object_id, temp, &temp, &infoLog[0]);
             glDeleteShader(compiled_object_id);
             std::cout << infoLog.data() << '\n';

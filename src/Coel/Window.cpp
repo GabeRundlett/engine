@@ -8,111 +8,113 @@
 #include <GLFW/glfw3.h>
 
 namespace Coel {
-    static GLFWwindow *windowHandle;
-    void dwc(Window &) {} // default window callback
+    static std::size_t s_windowCount = 0;
 
-    Window::Window(int width, int height, const char *const title)
-        : size{width, height}, mouse{{0, 0}, {0, 0}, 0, 0, 0}, onMouseScroll(dwc), onMouseMove(dwc), onMouseButton(dwc),
-          onResize(dwc), onKey(dwc) {
-        init(width, height, title); //
-    }
-
-    Window::~Window() {
-        deinit(); //
-    }
-
-    int Window::init(int width, int height, const char *const title) {
-        if (!glfwInit()) {
-            std::cerr << "Failed to initalize GLFW\n";
-            return -1;
+    int create(Window &window) {
+        if (!s_windowCount) {
+            if (!glfwInit()) {
+                std::cerr << "Failed to initalize GLFW\n";
+                return -1;
+            }
         }
 
-        windowHandle = glfwCreateWindow(width, height, title, nullptr, nullptr);
-        if (!windowHandle) {
+        ++s_windowCount;
+
+        static constexpr auto dwc = [](Window &) {};
+        if (window.onResize == nullptr) window.onResize = dwc;
+        if (window.onMouseButton == nullptr) window.onMouseButton = dwc;
+        if (window.onMouseMove == nullptr) window.onMouseMove = dwc;
+        if (window.onMouseScroll == nullptr) window.onMouseScroll = dwc;
+        if (window.onKey == nullptr) window.onKey = dwc;
+        if (window.onChar == nullptr) window.onChar = dwc;
+
+        window.glfwHandle = glfwCreateWindow(window.size.x, window.size.y, window.title, nullptr, nullptr);
+        if (!window.glfwHandle) {
             std::cerr << "Failed to create window\n";
-            deinit();
+            destroy(window);
             return -1;
         }
-        if (Renderer::Context::init(windowHandle)) {
+
+        if (Renderer::Context::init(window)) {
             std::cerr << "Failed to create valid render context\n";
-            deinit();
+            destroy(window);
             return -1;
         }
 
-        glfwSetWindowUserPointer(windowHandle, this);
-        glfwSetInputMode(windowHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        // glfwSwapInterval(0);
-
+        glfwSetWindowUserPointer(window.glfwHandle, &window);
+        glfwSetInputMode(window.glfwHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        glfwSetWindowSizeCallback(windowHandle, [](GLFWwindow *glfwWindow, int w, int h) {
+        glfwSetWindowSizeCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int w, int h) {
             Renderer::resizeViewport(0, 0, w, h);
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
             window->size = {w, h};
             window->onResize(*window);
         });
-
-        glfwSetCursorPosCallback(windowHandle, [](GLFWwindow *glfwWindow, double x, double y) {
-            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
-            window->mouse.pos = {x, y};
-            window->onMouseMove(*window);
-        });
-        glfwSetScrollCallback(windowHandle, [](GLFWwindow *glfwWindow, double x, double y) {
-            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
-            window->mouse.scrollOffset = {x, y};
-            window->onMouseScroll(*window);
-        });
-        glfwSetMouseButtonCallback(windowHandle, [](GLFWwindow *glfwWindow, int button, int action, int mods) {
+        glfwSetMouseButtonCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int button, int action, int mods) {
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
             window->mouse.button = button;
             window->mouse.action = action;
             window->mouse.mods = mods;
             window->onMouseButton(*window);
         });
-
-        glfwSetKeyCallback(windowHandle,
-                           [](GLFWwindow *glfwWindow, int key, [[maybe_unused]] int scancode, int action, int mods) {
-                               Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
-                               window->key.code = key;
-                               window->key.action = action;
-                               window->key.mods = mods;
-                               window->onKey(*window);
-                           });
-
+        glfwSetCursorPosCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, double x, double y) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->mouse.pos = {x, y};
+            window->onMouseMove(*window);
+        });
+        glfwSetScrollCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, double x, double y) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->mouse.scrollOffset = {x, y};
+            window->onMouseScroll(*window);
+        });
+        glfwSetKeyCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->key.code = key;
+            window->key.scancode = scancode;
+            window->key.action = action;
+            window->key.mods = mods;
+            window->onKey(*window);
+        });
+        glfwSetCharCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, unsigned int codepoint) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->key.character = codepoint;
+            window->onChar(*window);
+        });
         return 0;
     }
 
-    void Window::update() {
+    void destroy(Window &window) {
+        glfwDestroyWindow(window.glfwHandle);
+        --s_windowCount;
+        if (!s_windowCount) glfwTerminate();
+    }
+
+    void update(Window &window) {
         glfwPollEvents();
-        glfwSwapBuffers(windowHandle);
+        glfwSwapBuffers(window.glfwHandle);
+        window.isOpen = !glfwWindowShouldClose(window.glfwHandle);
     }
 
-    bool Window::isOpen() const {
-        return !glfwWindowShouldClose(windowHandle); //
-    }
-
-    double Window::getTime() const {
+    double getTime() {
         return glfwGetTime(); //
     }
 
-    void Window::cursorTo(const glm::dvec2 &pos) {
-        mouse.pos = pos;
-        glfwSetCursorPos(windowHandle, pos.x, pos.y);
+    void cursorTo(Window &window, const glm::dvec2 &pos) {
+        window.mouse.pos = pos;
+        glfwSetCursorPos(window.glfwHandle, pos.x, pos.y);
     }
 
-    void Window::cursorMode(const unsigned int mode) {
-        glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + mode); //
+    void cursorMode(const Window &window, const unsigned int mode) {
+        glfwSetInputMode(window.glfwHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + mode); //
     }
 
-    void Window::deinit() {
-        glfwTerminate(); //
+    void close(const Window &window) {
+        glfwSetWindowShouldClose(window.glfwHandle, true); //
     }
-    void Window::close() {
-        glfwSetWindowShouldClose(windowHandle, true); //
+
+    void resize(Window &window) {
+        Renderer::resizeViewport(0, 0, window.size.x, window.size.y);
+        window.onResize(window);
     }
-    void Window::resize() {
-        Renderer::resizeViewport(0, 0, size.x, size.y);
-        onResize(*this);
-    }
-    GLFWwindow *Window::getGlfwWindow() { return windowHandle; }
 } // namespace Coel

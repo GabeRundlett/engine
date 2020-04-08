@@ -5,20 +5,20 @@
 namespace Coel {
     namespace Key {
         enum KeyboardKeyID : const unsigned short {
-            Space = 32,
-            Apostrophe = 39,
-            Comma = 44,
-            Minus = 45,
-            Period = 46,
-            Slash = 47,
+            Space = ' ',
+            Apostrophe = '\'',
+            Comma = ',',
+            Minus = '-',
+            Period = '.',
+            Slash = '/',
 
-            SemiColon = 59,
-            Equal = 60,
+            SemiColon = ';',
+            Equal = '=',
 
-            LeftBracket = 91,
-            RightBracket = 93,
-            Backslash = 92,
-            GraveAccent = 96,
+            LeftBracket = '[',
+            RightBracket = ']',
+            Backslash = '\\',
+            GraveAccent = '`',
 
             World1 = 161,
             World2 = 162,
@@ -55,16 +55,16 @@ namespace Coel {
 
             Menu = 348,
 
-            NumRow0 = 48,
-            NumRow1 = 49,
-            NumRow2 = 50,
-            NumRow3 = 51,
-            NumRow4 = 52,
-            NumRow5 = 53,
-            NumRow6 = 54,
-            NumRow7 = 55,
-            NumRow8 = 56,
-            NumRow9 = 57,
+            NumRow0 = '0',
+            NumRow1,
+            NumRow2,
+            NumRow3,
+            NumRow4,
+            NumRow5,
+            NumRow6,
+            NumRow7,
+            NumRow8,
+            NumRow9,
 
             Numpad0 = 320,
             Numpad1 = 321,
@@ -111,32 +111,32 @@ namespace Coel {
             F24 = 313,
             F25 = 314,
 
-            A = 65,
-            B = 66,
-            C = 67,
-            D = 68,
-            E = 69,
-            F = 70,
-            G = 71,
-            H = 72,
-            I = 73,
-            J = 74,
-            K = 75,
-            L = 76,
-            M = 77,
-            N = 78,
-            O = 79,
-            P = 80,
-            Q = 81,
-            R = 82,
-            S = 83,
-            T = 84,
-            U = 85,
-            V = 86,
-            W = 87,
-            X = 88,
-            Y = 89,
-            Z = 90,
+            A = 'A',
+            B,
+            C,
+            D,
+            E,
+            F,
+            G,
+            H,
+            I,
+            J,
+            K,
+            L,
+            M,
+            N,
+            O,
+            P,
+            Q,
+            R,
+            S,
+            T,
+            U,
+            V,
+            W,
+            X,
+            Y,
+            Z,
         };
     }
     namespace Button {
@@ -172,7 +172,8 @@ namespace Coel {
         };
     }
     struct KeyInfo {
-        int code, action, mods;
+        int code, scancode, action, mods;
+        unsigned int character;
     };
     struct MouseInfo {
         glm::dvec2 pos, scrollOffset;

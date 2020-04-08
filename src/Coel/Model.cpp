@@ -1,4 +1,5 @@
 #include "Model.hpp"
+#include "Renderer/Renderer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -99,12 +100,12 @@ namespace Coel {
     }
 
     Model::Model(const char *const filepath)
-        : m_vertices(loadModel(filepath)), m_vao{},
-          m_vbo{m_vertices.data(),
-                (unsigned int)(m_vertices.size() * sizeof(Vertex)),
-                {{Element::F32, 3}, {Element::F32, 3}, {Element::F32, 2}, {Element::F32, 4}}} {
-        m_vao.add(m_vbo);
+        : m_vertices(loadModel(filepath)), m_vao{}, m_vbo{{{F32, 3}, {F32, 3}, {F32, 2}, {F32, 4}}} {
+        create(m_vbo, m_vertices.data(), m_vertices.size() * sizeof(Vertex));
+        link(m_vao, m_vbo);
     }
 
-    void Model::draw() { m_vao.draw(m_vertices.size()); }
+    void Model::draw() {
+        Renderer::draw(m_vao, m_vertices.size()); //
+    }
 } // namespace Coel

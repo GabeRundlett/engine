@@ -1,5 +1,7 @@
-#define GLFW_INCLUDE_NONE
+#pragma once
+
+#include <Coel/Window.hpp>
 
 namespace Coel { namespace Renderer { namespace Context {
-    int init(void *const windowHandle);
+    int init(const Window &window);
 }}} // namespace Coel::Renderer::Context

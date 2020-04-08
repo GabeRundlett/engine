@@ -1,54 +1,65 @@
 #include "Batch2d.hpp"
-#include <glad/glad.h>
+#include <Coel/Renderer/Renderer.hpp>
 
-#include "Assets/Batch2dShader.hpp"
+#include <glad/glad.h>
+#include <array>
+
+static constexpr const char *const vertSrc = R"(
+#version 440
+layout (location = 0) in vec2 a_pos;
+void main() {
+	gl_Position = vec4(a_pos, 0, 1);
+})";
+
+static constexpr const char *const fragSrc = R"(
+#version 440
+out vec4 color;
+void main() {
+    color = vec4(1, 0, 0, 1);
+})";
 
 namespace Coel { namespace Renderer {
-    Batch2d::Batch2d(const char *const vsrc, const char *const fsrc, unsigned int vCount, unsigned int iCount)
-        : m_vao(), m_vbo(nullptr, sizeof(Vertex) * vCount,
-                         {{Element::F32, 2}, {Element::F32, 2}, {Element::F32, 2}, {Element::U8, 4}, {Element::U8, 4}}),
-          m_ibo(nullptr, sizeof(Index) * iCount),
-          m_shader(vsrc, fsrc), m_viewPosUniform{m_shader.findFloat2("viewportPos")}, m_viewSizeUniform{m_shader.findFloat2(
-                                                                                          "viewportSize")},
-          m_maxVertexCount(vCount), m_maxIndexCount(iCount), m_strokeWeight(4), m_fillCol{0} {
-        m_vao.add(m_vbo);
-    }
-
-    Batch2d::Batch2d(unsigned int vCount, unsigned int iCount) : Batch2d::Batch2d(vertSrc, fragSrc, vCount, iCount) {}
-
+    constexpr unsigned int MAX_SPRITE_COUNT = 10000, MAX_VCOUNT = MAX_SPRITE_COUNT * 4, MAX_ICOUNT = MAX_SPRITE_COUNT * 6,
+                           MAX_VSIZE = 10000 * 4 * sizeof(Batch2d::Vertex), MAX_ISIZE = 10000 * 6 * sizeof(unsigned int);
+    Batch2d::Batch2d() : batch({{F32, 2}}, vertSrc, fragSrc) { init(batch, MAX_VSIZE, MAX_ISIZE); }
+    Batch2d::~Batch2d() { deinit(batch); }
     void Batch2d::begin() {
-        m_vao.bind();
-        m_vbo.open(&m_vertices);
-        m_ibo.open(&m_indices);
+        bind(batch.vao);
+        open(batch.vbo, &vertexHandle);
+        open(batch.ibo, &indexHandle);
     }
 
     void Batch2d::submitRect(float x, float y, float w, float h) {
-        submitQuad({{x, y}, {x + w, y + h}, {0, 0}, {1, 1}, {0, 0, 0, 0}}); //
-    }
+        if (vertexCount + 4 > MAX_VCOUNT || indexCount + 6 > MAX_ICOUNT) {
+            flush();
+            begin();
+        }
 
-    void Batch2d::submitLine(float x1, float y1, float x2, float y2) {
-        submitQuad({{x1, y1}, {x2, y2}, {0.f, 0.f}, {1.f, 1.f}, glm::u8vec4(1.f, (float)m_strokeWeight, 0.f, 0.f)}); //
-    }
+        *(std::array<Vertex, 4> *)vertexHandle = {{
+            {x, y},
+            {x, y + h},
+            {x + w, y},
+            {x + w, y + h},
+        }};
 
-    void Batch2d::submitEllipse(float x, float y, float rx, float ry) {
-        submitQuad({{x - rx, y - ry}, {x + rx, y + ry}, {0, 0}, {1, 1}, {2, 0, 0, 0}}); //
+        *(std::array<unsigned int, 6> *)indexHandle = {
+            vertexCount + 0, //
+            vertexCount + 1, //
+            vertexCount + 2, //
+            vertexCount + 1, //
+            vertexCount + 3, //
+            vertexCount + 2, //
+        };
+
+        vertexHandle += 4, indexHandle += 6;
+        vertexCount += 4, indexCount += 6;
     }
 
     void Batch2d::flush() {
-        m_vbo.close();
-        m_ibo.close();
-
-        m_shader.bind();
-        m_vao.drawIndexed(m_indexCount);
-
-        m_vertexCount = 0, m_indexCount = 0;
-    }
-
-    void Batch2d::fill(const glm::u8vec4 &c) { m_fillCol = c; }
-    void Batch2d::strokeWeight(const float weight) { m_strokeWeight = weight; }
-
-    void Batch2d::resize(const glm::vec2 &pos, const glm::vec2 &size) {
-        m_shader.send(m_viewPosUniform, &pos);
-        m_shader.send(m_viewSizeUniform, &size);
+        Coel::close(batch.vbo);
+        Coel::close(batch.ibo);
+        batch.shader.bind();
+        Coel::Renderer::drawIndexed(batch.vao, indexCount);
+        vertexCount = 0, indexCount = 0;
     }
 }} // namespace Coel::Renderer
