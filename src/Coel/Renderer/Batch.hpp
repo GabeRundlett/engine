@@ -8,11 +8,10 @@ namespace Coel { namespace Renderer {
         Vao vao{};
         Vbo vbo;
         Ibo ibo{};
-        Shader shader;
 
-        Batch(const Layout &l, const char *const vertSrc, const char *const fragSrc);
+        Batch(const Layout &l);
     };
 
-    void init(Batch &b, const unsigned int vsize, const unsigned int isize);
+    void init(Batch &b, const uint32_t vsize, const uint32_t isize);
     void deinit(Batch &b);
 }} // namespace Coel::Renderer

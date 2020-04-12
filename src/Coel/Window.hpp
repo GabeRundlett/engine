@@ -1,10 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include "Input.hpp"
-
 #include <memory>
 #include <functional>
+#include <Coel/Input.hpp>
+#include <Coel/Renderer/Buffer.hpp>
 
 struct GLFWwindow;
 
@@ -18,12 +17,15 @@ namespace Coel {
     struct Window {
         bool isOpen{true};
         glm::ivec2 size{800, 600};
+        Fbo fbo{0, size};
         const char *const title{"Coel Window"};
         KeyInfo key{};
         MouseInfo mouse{};
         GLFWwindow *glfwHandle{};
-        std::function<void(Window &)> onResize{}, onMouseButton{}, onMouseMove{}, onMouseScroll{}, onKey{}, onChar{};
-        Window(const glm::ivec2 size, const char *const title) : size(size), title{title} {}
+        std::function<void(Window &)> onResize{}, onFboResize{};
+        std::function<void(Window &)> onMouseButton{}, onMouseMove{}, onMouseScroll{};
+        std::function<void(Window &)> onKey{}, onChar{};
+        Window(const glm::ivec2 size, const char *const title) : size(size), fbo{0, size}, title{title} {}
         Window(const char *const title) : title{title} {}
         Window() = default;
     };
@@ -32,4 +34,7 @@ namespace Coel {
     void destroy(Window &window);
     void update(Window &window);
     double getTime();
+    void cursorTo(Window &window, const glm::dvec2 &pos);
+    void cursorMode(const Window &window, const CursorMode mode);
+    void resize(Window &window);
 } // namespace Coel

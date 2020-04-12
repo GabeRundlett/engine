@@ -1,44 +1,40 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace Coel {
-    namespace Format {
-        enum ID {
-            RGB8,
-            RGBA8,
-            RGB32F,
-            Depth,
-        };
-    }
-
-    namespace Filter {
-        enum Mode {
-            Nearest,
-            Linear,
-        };
-    }
-
-    namespace Wrap {
-        enum Mode {
-            Repeat,
-            ClampToEdge,
-            ClampToBorder,
-        };
-    }
-
-    class Texture final {
-        unsigned int m_id, m_formatData[3];
-        int m_width, m_height;
-
-      public:
-        Texture(const char *const filepath);
-        Texture(const int width, const int height, unsigned char format = Format::RGB32F,
-                const unsigned char *const data = nullptr);
-
-        void bind(const int slot) const;
-        void setData(const unsigned char *const data) const;
-
-        void setMinFilter(const unsigned char mode);
-        void setMagFilter(const unsigned char mode);
-        void setWrap(const unsigned char mode);
+    enum TextureFormat {
+        RED,
+        REDF,
+        RGB,
+        RGBA,
+        RGB16F,
+        RGBA16F,
+        RGB32F,
+        RGBA32F,
+        Depth,
     };
+    enum TextureFilter {
+        Linear,
+        Nearest,
+    };
+    enum TextureWrap {
+        ClampToEdge,
+        ClampToBorder,
+        Repeat,
+    };
+
+    struct Texture {
+        glm::ivec2 size{};
+        uint32_t id{}, fmtData[3]{};
+    };
+
+    void create(Texture &tex, const char *const filepath);
+    void create(Texture &tex, const glm::ivec2 &size, const TextureFormat format, const uint8_t *const data);
+    void bind(const Texture &tex, const int32_t slot);
+    void setData(const Texture &tex, const uint8_t *const data);
+    void setMinFilter(Texture &tex, TextureFilter mode);
+    void setMagFilter(Texture &tex, TextureFilter mode);
+    void setWrapMode(Texture &tex, TextureWrap mode);
+    void destroy(Texture &tex);
 } // namespace Coel

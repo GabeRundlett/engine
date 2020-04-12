@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(Coelengine VERSION 1.0.0)
+enable_testing()
 
 if (NOT TARGET Coelengine)
     add_subdirectory(dep/glfw)
@@ -10,4 +11,5 @@ if (NOT TARGET Coelengine)
     add_subdirectory(dep/stb)
 
     add_subdirectory(src)
+    add_subdirectory(test)
 endif()

@@ -14,7 +14,7 @@ namespace Coel { namespace Renderer {
     void setClearColor(float r, float g, float b, float a) {
         glClearColor(r, g, b, a); //
     }
-    void resizeViewport(int x, int y, int w, int h) {
+    void resizeViewport(int32_t x, int32_t y, int32_t w, int32_t h) {
         glViewport(x, y, w, h); //
     }
     void enableBlend(bool mode) {
@@ -46,12 +46,16 @@ namespace Coel { namespace Renderer {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    void draw(const Vao &vao, unsigned int count) {
+    void draw(const Model &model) {
+        draw(model.vao, model.vertices.size()); //
+    }
+
+    void draw(const Vao &vao, uint32_t count) {
         bind(vao);
         glDrawArrays(GL_TRIANGLES, 0, count);
     }
 
-    void drawIndexed(const Vao &vao, unsigned int count) {
+    void drawIndexed(const Vao &vao, uint32_t count) {
         bind(vao);
         glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Input.hpp"
+#include <Coel/Input.hpp>
 
 namespace Coel {
     class Camera3D {

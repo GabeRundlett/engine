@@ -22,6 +22,7 @@ namespace Coel {
 
         static constexpr auto dwc = [](Window &) {};
         if (window.onResize == nullptr) window.onResize = dwc;
+        if (window.onFboResize == nullptr) window.onFboResize = dwc;
         if (window.onMouseButton == nullptr) window.onMouseButton = dwc;
         if (window.onMouseMove == nullptr) window.onMouseMove = dwc;
         if (window.onMouseScroll == nullptr) window.onMouseScroll = dwc;
@@ -50,6 +51,11 @@ namespace Coel {
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
             window->size = {w, h};
             window->onResize(*window);
+        });
+        glfwSetFramebufferSizeCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int w, int h) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->fbo = {0, {w, h}};
+            window->onFboResize(*window);
         });
         glfwSetMouseButtonCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int button, int action, int mods) {
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
@@ -105,7 +111,7 @@ namespace Coel {
         glfwSetCursorPos(window.glfwHandle, pos.x, pos.y);
     }
 
-    void cursorMode(const Window &window, const unsigned int mode) {
+    void cursorMode(const Window &window, const CursorMode mode) {
         glfwSetInputMode(window.glfwHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + mode); //
     }
 
@@ -116,5 +122,6 @@ namespace Coel {
     void resize(Window &window) {
         Renderer::resizeViewport(0, 0, window.size.x, window.size.y);
         window.onResize(window);
+        window.onFboResize(window);
     }
 } // namespace Coel

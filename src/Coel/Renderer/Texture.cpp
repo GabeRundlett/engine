@@ -4,72 +4,79 @@
 #include <stb.hpp>
 
 namespace Coel {
-    static inline void toOpenGLColorFormat(unsigned char attachment, GLenum data[3]) {
-        switch (attachment) {
-        case Format::RGB8: data[0] = GL_RGB8, data[1] = GL_RGB, data[2] = GL_UNSIGNED_BYTE; return;
-        case Format::RGBA8: data[0] = GL_RGBA8, data[1] = GL_RGBA, data[2] = GL_UNSIGNED_BYTE; return;
-        case Format::RGB32F: data[0] = GL_RGB32F, data[1] = GL_RGB, data[2] = GL_FLOAT; return;
+    static inline void toGlFormat(const TextureFormat format, uint32_t fmtData[3]) {
+        switch (format) {
+        case RED: fmtData[0] = GL_RED, fmtData[1] = GL_RED, fmtData[2] = GL_UNSIGNED_BYTE; break;
+        case REDF: fmtData[0] = GL_RED, fmtData[1] = GL_RED, fmtData[2] = GL_FLOAT; break;
+        case RGB: fmtData[0] = GL_RGB8, fmtData[1] = GL_RGB, fmtData[2] = GL_UNSIGNED_BYTE; break;
+        case RGBA: fmtData[0] = GL_RGBA8, fmtData[1] = GL_RGBA, fmtData[2] = GL_UNSIGNED_BYTE; break;
+        case RGB16F: fmtData[0] = GL_RGB16F, fmtData[1] = GL_RGB, fmtData[2] = GL_FLOAT; break;
+        case RGBA16F: fmtData[0] = GL_RGBA16F, fmtData[1] = GL_RGBA, fmtData[2] = GL_FLOAT; break;
+        case RGB32F: fmtData[0] = GL_RGB32F, fmtData[1] = GL_RGB, fmtData[2] = GL_FLOAT; break;
+        case RGBA32F: fmtData[0] = GL_RGBA32F, fmtData[1] = GL_RGBA, fmtData[2] = GL_FLOAT; break;
+        case Depth: fmtData[0] = GL_DEPTH_COMPONENT, fmtData[1] = GL_DEPTH_COMPONENT, fmtData[2] = GL_FLOAT; break;
+        default: break;
         }
     }
-    static inline auto toOpenGLFilterMode(unsigned char mode) {
+
+    static inline constexpr GLenum toGlFilter(const TextureFilter mode) {
         switch (mode) {
-        case Filter::Nearest: return GL_NEAREST;
-        case Filter::Linear: return GL_LINEAR;
+        case Linear: return GL_LINEAR;
         default: return GL_NEAREST;
         }
     }
-    static inline auto toOpenGLWrapMode(unsigned char mode) {
+    static inline constexpr GLenum toGlWrap(const TextureWrap mode) {
         switch (mode) {
-        case Wrap::Repeat: return GL_REPEAT;
-        case Wrap::ClampToEdge: return GL_CLAMP_TO_EDGE;
-        case Wrap::ClampToBorder: return GL_CLAMP_TO_BORDER;
+        case ClampToEdge: return GL_CLAMP_TO_EDGE;
+        case ClampToBorder: return GL_CLAMP_TO_BORDER;
         default: return GL_REPEAT;
         }
     }
 
-    Texture::Texture(const char *const filepath) {
+    void create(Texture &tex, const char *const filepath) {
+        int32_t channels;
         stbi_set_flip_vertically_on_load(true);
-        int channels;
-        stbi_uc *data = stbi_load(filepath, &m_width, &m_height, &channels, 0);
+        stbi_uc *data = stbi_load(filepath, &tex.size.x, &tex.size.y, &channels, 0);
+        TextureFormat format{};
         switch (channels) {
-        case 3: toOpenGLColorFormat(Format::RGB8, m_formatData); break;
-        case 4: toOpenGLColorFormat(Format::RGBA8, m_formatData); break;
+        case 1: format = RED; break;
+        case 3: format = RGB; break;
+        case 4: format = RGBA; break;
         default: break;
         }
-        glCreateTextures(GL_TEXTURE_2D, 1, &m_id);
-        glTextureStorage2D(m_id, 1, m_formatData[0], m_width, m_height);
-        glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_formatData[1], m_formatData[2], data);
+        create(tex, tex.size, format, data);
         stbi_image_free(data);
     }
 
-    Texture::Texture(const int width, const int height, unsigned char format, const unsigned char *const data)
-        : m_width(width), m_height(height) {
-        toOpenGLColorFormat(format, m_formatData);
-        glCreateTextures(GL_TEXTURE_2D, 1, &m_id);
-        glTextureStorage2D(m_id, 1, m_formatData[0], m_width, m_height);
-        if (data != nullptr) glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_formatData[1], m_formatData[2], data);
+    void create(Texture &tex, const glm::ivec2 &size, const TextureFormat format, const unsigned char *const data) {
+        tex.size = size;
+        toGlFormat(format, tex.fmtData);
+        glCreateTextures(GL_TEXTURE_2D, 1, &tex.id);
+        glBindTexture(GL_TEXTURE_2D, tex.id);
+        glTextureStorage2D(tex.id, 1, tex.fmtData[0], tex.size.x, tex.size.y);
+        if (data != nullptr) setData(tex, data);
     }
 
-    void Texture::bind(const int slot) const {
+    void bind(const Texture &tex, const int32_t slot) {
         glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, m_id);
+        glBindTexture(GL_TEXTURE_2D, tex.id);
     }
 
-    void Texture::setData(const unsigned char *const data) const {
-        glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_formatData[1], m_formatData[2], data);
+    void setData(const Texture &tex, const uint8_t *const data) {
+        glTextureSubImage2D(tex.id, 0, 0, 0, tex.size.x, tex.size.y, tex.fmtData[1], tex.fmtData[2], data);
     }
 
-    void Texture::setMinFilter(const unsigned char mode) {
-        auto filterMode = toOpenGLFilterMode(mode);
-        glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, filterMode);
+    void setMinFilter(Texture &tex, const TextureFilter mode) {
+        glTextureParameteri(tex.id, GL_TEXTURE_MIN_FILTER, toGlFilter(mode));
     }
-    void Texture::setMagFilter(const unsigned char mode) {
-        auto filterMode = toOpenGLFilterMode(mode);
-        glTextureParameteri(m_id, GL_TEXTURE_MAG_FILTER, filterMode);
+    void setMagFilter(Texture &tex, const TextureFilter mode) {
+        glTextureParameteri(tex.id, GL_TEXTURE_MAG_FILTER, toGlFilter(mode));
     }
-    void Texture::setWrap(const unsigned char mode) {
-        auto wrapMode = toOpenGLWrapMode(mode);
-        glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, wrapMode);
-        glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, wrapMode);
+    void setWrapMode(Texture &tex, const TextureWrap mode) {
+        glTextureParameteri(tex.id, GL_TEXTURE_WRAP_S, toGlWrap(mode));
+        glTextureParameteri(tex.id, GL_TEXTURE_WRAP_T, toGlWrap(mode));
+    }
+    void destroy(Texture &tex) {
+        glDeleteTextures(1, &tex.id); //
     }
 } // namespace Coel

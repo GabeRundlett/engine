@@ -7,15 +7,16 @@
 #include <vector>
 
 namespace Coel {
-    std::vector<Model::Vertex> Model::loadModel(const char *const filepath) {
-        std::vector<Vertex> data;
+    std::vector<Model::Vertex> loadModel(const char *const filepath) {
+        std::vector<Model::Vertex> data;
         std::ifstream modelFile(filepath);
         struct TriIndex {
             struct V {
+                struct VData {
+                    int pos, tex, nrm;
+                };
                 union {
-                    struct {
-                        int pos, tex, nrm;
-                    } vdata;
+                    VData vdata;
                     int data[3];
                 };
             } v[3];
@@ -91,21 +92,15 @@ namespace Coel {
                         texCoords[v.vdata.tex],
                         {1, 0, 1, 1},
                     });
-                    // std::cout << v.pos << ", " << v.nrm << ", " << v.tex << "  ";
                 }
-                // std::cout << '\n';
             }
         }
         return data;
     }
 
-    Model::Model(const char *const filepath)
-        : m_vertices(loadModel(filepath)), m_vao{}, m_vbo{{{F32, 3}, {F32, 3}, {F32, 2}, {F32, 4}}} {
-        create(m_vbo, m_vertices.data(), m_vertices.size() * sizeof(Vertex));
-        link(m_vao, m_vbo);
-    }
-
-    void Model::draw() {
-        Renderer::draw(m_vao, m_vertices.size()); //
+    void create(Model &model, const char *const filepath) {
+        model.vertices = loadModel(filepath);
+        create(model.vbo, model.vertices.data(), model.vertices.size() * sizeof(Model::Vertex));
+        link(model.vao, model.vbo);
     }
 } // namespace Coel

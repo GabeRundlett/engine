@@ -1,9 +1,9 @@
 #include "Batch.hpp"
 
 namespace Coel { namespace Renderer {
-    Batch::Batch(const Layout &l, const char *vertSrc, const char *fragSrc) : vbo{l}, shader(vertSrc, fragSrc) {}
+    Batch::Batch(const Layout &l) : vbo{l} {}
 
-    void init(Batch &b, const unsigned int vsize, const unsigned int isize) {
+    void init(Batch &b, const uint32_t vsize, const uint32_t isize) {
         create(b.vao);
         create(b.vbo, nullptr, vsize);
         create(b.ibo, nullptr, isize);
