@@ -87,6 +87,12 @@ namespace Coel {
             window->key.character = codepoint;
             window->onChar(*window);
         });
+
+        window.onResize(window);
+        window.onFboResize(window);
+        window.prevTime = window.time;
+        window.time = glfwGetTime();
+        window.elapsed = window.time - window.prevTime;
         return 0;
     }
 
@@ -97,6 +103,9 @@ namespace Coel {
     }
 
     void update(Window &window) {
+        window.prevTime = window.time;
+        window.time = glfwGetTime();
+        window.elapsed = window.time - window.prevTime;
         glfwPollEvents();
         glfwSwapBuffers(window.glfwHandle);
         window.isOpen = !glfwWindowShouldClose(window.glfwHandle);

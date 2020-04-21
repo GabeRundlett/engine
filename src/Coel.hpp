@@ -12,7 +12,7 @@
 
 #include <Coel/Renderers/Quad2d.hpp>
 #include <Coel/Renderers/Batch2d.hpp>
-#include <Coel/Renderers/BatchText.hpp>
+#include <Coel/Renderers/Sprite.hpp>
 #include <Coel/Renderers/ImGui/ImGuiRenderer.hpp>
 
 #include <glm/glm.hpp>

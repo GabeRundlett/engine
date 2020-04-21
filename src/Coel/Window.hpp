@@ -14,18 +14,19 @@ namespace Coel {
         Disabled,
     };
 
-    struct Window {
-        bool isOpen{true};
+    struct Window final {
         glm::ivec2 size{800, 600};
-        Fbo fbo{0, size};
         const char *const title{"Coel Window"};
+        Fbo fbo{0, size};
         KeyInfo key{};
         MouseInfo mouse{};
         GLFWwindow *glfwHandle{};
+        double time{}, prevTime{}, elapsed{};
         std::function<void(Window &)> onResize{}, onFboResize{};
         std::function<void(Window &)> onMouseButton{}, onMouseMove{}, onMouseScroll{};
         std::function<void(Window &)> onKey{}, onChar{};
-        Window(const glm::ivec2 size, const char *const title) : size(size), fbo{0, size}, title{title} {}
+        bool isOpen{true};
+        Window(const glm::ivec2 size, const char *const title) : size(size), title{title}, fbo{0, size} {}
         Window(const char *const title) : title{title} {}
         Window() = default;
     };
