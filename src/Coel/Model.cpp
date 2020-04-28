@@ -6,101 +6,77 @@
 #include <string>
 #include <vector>
 
-namespace Coel {
-    std::vector<Model::Vertex> loadModel(const char *const filepath) {
-        std::vector<Model::Vertex> data;
-        std::ifstream modelFile(filepath);
-        struct TriIndex {
-            struct V {
-                struct VData {
-                    int pos, tex, nrm;
-                };
-                union {
-                    VData vdata;
-                    int data[3];
-                };
-            } v[3];
-        };
-        if (modelFile.is_open()) {
-            std::string line;
-            std::vector<glm::vec3> positions;
-            std::vector<glm::vec2> texCoords;
-            std::vector<glm::vec3> normals;
-            std::vector<TriIndex> triangles;
-            std::size_t triCount = 0;
-            while (std::getline(modelFile, line)) {
-                if (line[0] == 'v') {
-                    if (line[1] == ' ') { // Position
-                        line = line.substr(2);
-                        positions.push_back({});
-                        auto &pos = positions.back();
-                        for (unsigned int i = 0; i < 3; ++i) {
-                            std::size_t termEnd;
-                            pos[i] = std::stof(line, &termEnd);
-                            line = line.substr(termEnd);
-                        }
-                    } else if (line[1] == 't') { // Texture Coord
-                        line = line.substr(3);
-                        texCoords.push_back({});
-                        auto &tex = texCoords.back();
-                        for (unsigned int i = 0; i < 2; ++i) {
-                            std::size_t termEnd;
-                            tex[i] = std::stof(line, &termEnd);
-                            line = line.substr(termEnd);
-                        }
-                    } else if (line[1] == 'n') { // Normal
-                        line = line.substr(3);
-                        normals.push_back({});
-                        auto &nrm = normals.back();
-                        for (unsigned int i = 0; i < 3; ++i) {
-                            std::size_t termEnd;
-                            nrm[i] = std::stof(line, &termEnd);
-                            line = line.substr(termEnd);
-                        }
-                    }
-                } else if (line[0] == 'f') { // Tri
-                    line = line.substr(2);
-                    triangles.push_back({});
-                    for (unsigned int i = 0; i < 3; ++i) {
-                        std::size_t termEnd;
-                        auto a = std::stoi(line, &termEnd) - 1;
-                        triangles[triCount].v[0].data[i] = a;
-                        line = line.substr(termEnd + 1);
-                    }
-                    for (unsigned int i = 0; i < 3; ++i) {
-                        std::size_t termEnd;
-                        auto a = std::stoi(line, &termEnd) - 1;
-                        triangles[triCount].v[1].data[i] = a;
-                        line = line.substr(termEnd + 1);
-                    }
-                    for (unsigned int i = 0; i < 3; ++i) {
-                        std::size_t termEnd;
-                        auto a = std::stoi(line, &termEnd) - 1;
-                        triangles[triCount].v[2].data[i] = a;
-                        if (i < 2) line = line.substr(termEnd + 1);
-                    }
-                    ++triCount;
-                }
-            }
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-            data.reserve(triCount * 3);
-            for (auto &t : triangles) {
-                for (auto &v : t.v) {
-                    data.push_back({
-                        positions[v.vdata.pos],
-                        normals[v.vdata.nrm],
-                        texCoords[v.vdata.tex],
-                        {1, 0, 1, 1},
-                    });
-                }
-            }
+namespace Coel {
+    static std::vector<Texture> loadTextures(Model::Object &object, aiMaterial *mat, aiTextureType type, std::string rootdir) {
+        std::vector<Texture> tempTextures;
+        for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
+            aiString str;
+            mat->GetTexture(type, i, &str);
+            Texture texture;
+            create(texture, (rootdir + '/' + str.C_Str()).c_str());
+            tempTextures.push_back(texture);
+            object.textures.push_back(texture);
         }
-        return data;
+        return tempTextures;
     }
 
-    void create(Model &model, const char *const filepath) {
-        model.vertices = loadModel(filepath);
-        create(model.vbo, model.vertices.data(), model.vertices.size() * sizeof(Model::Vertex));
-        link(model.vao, model.vbo);
+    static void processNode(Model &model, aiNode *node, const aiScene *scene, std::string rootdir) {
+        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+            Model::Object tempObj;
+
+            std::vector<Model::Vertex> vertices;
+            std::vector<unsigned int> indices;
+
+            for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+                Model::Vertex vertex;
+                auto v = mesh->mVertices[j];
+                vertex.pos = *(glm::vec3 *)(mesh->mVertices + j);
+                vertex.nrm = *(glm::vec3 *)(mesh->mNormals + j);
+                vertex.tex = *(glm::vec3 *)(mesh->mTextureCoords[0] + j);
+                vertices.push_back(vertex);
+            }
+            for (unsigned int j = 0; j < mesh->mNumFaces; j++) {
+                aiFace face = mesh->mFaces[j];
+                for (unsigned int k = 0; k < face.mNumIndices; k++) {
+                    if (face.mNumIndices != 3) std::cout << "index count: " << face.mNumIndices << '\n';
+                    indices.push_back(face.mIndices[k]);
+                }
+            }
+
+            aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+            std::vector<Texture> diffMaps = loadTextures(tempObj, material, aiTextureType_DIFFUSE, rootdir);
+            tempObj.textures.insert(tempObj.textures.end(), diffMaps.begin(), diffMaps.end());
+            std::vector<Texture> specMaps = loadTextures(tempObj, material, aiTextureType_SPECULAR, rootdir);
+            tempObj.textures.insert(tempObj.textures.end(), specMaps.begin(), specMaps.end());
+            std::vector<Texture> nrmMaps = loadTextures(tempObj, material, aiTextureType_HEIGHT, rootdir);
+            tempObj.textures.insert(tempObj.textures.end(), nrmMaps.begin(), nrmMaps.end());
+            std::vector<Texture> heightMaps = loadTextures(tempObj, material, aiTextureType_AMBIENT, rootdir);
+            tempObj.textures.insert(tempObj.textures.end(), heightMaps.begin(), heightMaps.end());
+
+            create(tempObj.vao);
+            create(tempObj.vbo, vertices.data(), (uint32_t)vertices.size() * sizeof(Model::Vertex));
+            create(tempObj.ibo, indices.data(), (uint32_t)indices.size() * sizeof(unsigned int));
+            link(tempObj.vao, tempObj.vbo);
+            tempObj.indexCount = (uint32_t)indices.size();
+            model.objects.push_back({tempObj});
+        }
+        for (unsigned int i = 0; i < node->mNumChildren; i++)
+            processNode(model, node->mChildren[i], scene, rootdir);
+    }
+
+    void open(Model &model, std::string filepath) {
+        Assimp::Importer import;
+        const aiScene *scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+            std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+            return;
+        }
+        processNode(model, scene->mRootNode, scene, filepath.substr());
     }
 } // namespace Coel

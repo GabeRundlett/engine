@@ -47,7 +47,15 @@ namespace Coel { namespace Renderer {
     }
 
     void draw(const Model &model) {
-        draw(model.vao, model.vertices.size()); //
+        for (const auto &o : model.objects) {
+            uint32_t slot = 0;
+            for (const auto &tex : o.textures) {
+                if (slot > 31) break;
+                bind(tex, slot);
+                ++slot;
+            }
+            drawIndexed(o.vao, o.indexCount);
+        }
     }
 
     void draw(const Vao &vao, uint32_t count) {
