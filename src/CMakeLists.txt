@@ -14,6 +14,7 @@ add_library(Coelengine
 	Coel/Renderers/Quad2d.cpp 
 	Coel/Renderers/Sprite.cpp 
 	Coel/Renderers/Batch2d.cpp 
+	Coel/Renderers/Batch3d.cpp 
 	# Coel/Renderers/BatchText.cpp
 
 	Coel/Renderers/ImGui/ImGuiRenderer.cpp 

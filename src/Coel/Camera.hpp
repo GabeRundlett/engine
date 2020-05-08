@@ -5,7 +5,7 @@
 namespace Coel {
     class Camera3D {
       public:
-        glm::mat4 projMat{0}, tranMat{0}, rotMat{0}, viewMat{0};
+        glm::mat4 projMat{1}, tranMat{1}, rotMat{1}, viewMat{1};
         glm::vec3 pos{}, rot{};
         float fov{glm::radians(90.f)}, aspect{1.f};
 
