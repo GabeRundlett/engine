@@ -31,8 +31,8 @@ namespace Coel {
         std::vector<Element> elements{};
         uint32_t stride{};
         Layout(const std::initializer_list<Element> &elem) : elements(elem) {
-            for (const auto elem : elements)
-                stride += elem.getSize();
+            for (const auto e : elements)
+                stride += e.getSize();
         }
     };
 

@@ -133,4 +133,8 @@ namespace Coel {
         window.onResize(window);
         window.onFboResize(window);
     }
+
+    void bind(const Window& window) {
+        glfwMakeContextCurrent(window.glfwHandle); //
+    }
 } // namespace Coel

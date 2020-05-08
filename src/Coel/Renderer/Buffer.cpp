@@ -128,7 +128,12 @@ namespace Coel {
         };
 
         if (colAttachmentCount < 5) {
-            glDrawBuffers(colAttachmentCount, drawBuffers);
+            if (colAttachmentCount == 0) {
+                glDrawBuffer(GL_NONE);
+                glReadBuffer(GL_NONE);
+            } else {
+                glDrawBuffers(colAttachmentCount, drawBuffers);
+            }
             for (auto &attachment : attachments) {
                 glAttachmentType = GL_DEPTH_ATTACHMENT;
                 if (attachment.fmtData[0] != GL_DEPTH_COMPONENT) {

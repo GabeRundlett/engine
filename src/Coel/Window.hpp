@@ -38,4 +38,5 @@ namespace Coel {
     void cursorTo(Window &window, const glm::dvec2 &pos);
     void cursorMode(const Window &window, const CursorMode mode);
     void resize(Window &window);
+    void bind(const Window &window);
 } // namespace Coel
