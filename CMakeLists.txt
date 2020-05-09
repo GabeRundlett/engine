@@ -9,7 +9,7 @@ if (NOT TARGET Coelengine)
     add_subdirectory(dep/glm)
     add_subdirectory(dep/imgui)
     add_subdirectory(dep/stb)
-    add_subdirectory(dep/assimp)
+    # add_subdirectory(dep/assimp)
 
     add_subdirectory(src)
     add_subdirectory(test)

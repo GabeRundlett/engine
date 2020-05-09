@@ -117,7 +117,8 @@ namespace Coel {
 
     float SpriteRenderer::getIndexOf(const Texture &texture) {
         for (uint32_t i = 1; i < textureCount; ++i)
-            if (textures[i] && textures[i]->id == texture.id) return i;
+            if (textures[i] && textures[i]->id == texture.id)
+                return i;
 
         textures[textureCount] = &texture;
         ++textureCount;

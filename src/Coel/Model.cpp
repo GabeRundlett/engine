@@ -7,8 +7,8 @@
 #include <vector>
 
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 namespace Coel {
     static std::vector<Texture> loadTextures(Model::Object &object, aiMaterial *mat, aiTextureType type, std::string rootdir) {
@@ -34,7 +34,6 @@ namespace Coel {
 
             for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
                 Model::Vertex vertex;
-                auto v = mesh->mVertices[j];
                 vertex.pos = *(glm::vec3 *)(mesh->mVertices + j);
                 vertex.nrm = *(glm::vec3 *)(mesh->mNormals + j);
                 vertex.tex = *(glm::vec3 *)(mesh->mTextureCoords[0] + j);
@@ -43,7 +42,8 @@ namespace Coel {
             for (unsigned int j = 0; j < mesh->mNumFaces; j++) {
                 aiFace face = mesh->mFaces[j];
                 for (unsigned int k = 0; k < face.mNumIndices; k++) {
-                    if (face.mNumIndices != 3) std::cout << "index count: " << face.mNumIndices << '\n';
+                    if (face.mNumIndices != 3)
+                        std::cout << "index count: " << face.mNumIndices << '\n';
                     indices.push_back(face.mIndices[k]);
                 }
             }

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <Coel/Renderer/Texture.hpp>
 #include <cstdint>
 #include <glm/glm.hpp>
-#include <Coel/Renderer/Texture.hpp>
+#include <vector>
 
 namespace Coel {
     enum ElementType {

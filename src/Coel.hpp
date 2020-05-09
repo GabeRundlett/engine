@@ -11,7 +11,6 @@
 #include <Coel/Renderer/Shader.hpp>
 
 #include <Coel/Renderers/Quad2d.hpp>
-#include <Coel/Renderers/Batch2d.hpp>
 #include <Coel/Renderers/Batch3d.hpp>
 #include <Coel/Renderers/Sprite.hpp>
 #include <Coel/Renderers/ImGui/ImGuiRenderer.hpp>

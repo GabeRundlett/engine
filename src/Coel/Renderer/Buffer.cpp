@@ -119,7 +119,8 @@ namespace Coel {
         GLenum glAttachmentType{};
         uint32_t colAttachmentCount{}, colAttachmentId{};
         for (auto &attachment : attachments)
-            if (attachment.fmtData[0] != GL_DEPTH_COMPONENT) ++colAttachmentCount;
+            if (attachment.fmtData[0] != GL_DEPTH_COMPONENT)
+                ++colAttachmentCount;
         GLenum drawBuffers[]{
             GL_COLOR_ATTACHMENT0,
             GL_COLOR_ATTACHMENT1,

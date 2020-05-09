@@ -54,7 +54,8 @@ namespace Coel {
         glCreateTextures(GL_TEXTURE_2D, 1, &tex.id);
         glBindTexture(GL_TEXTURE_2D, tex.id);
         glTextureStorage2D(tex.id, 1, tex.fmtData[0], tex.size.x, tex.size.y);
-        if (data != nullptr) setData(tex, data);
+        if (data != nullptr)
+            setData(tex, data);
     }
 
     void bind(const Texture &tex, const int32_t slot) {

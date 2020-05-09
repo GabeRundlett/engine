@@ -3,7 +3,8 @@
 #include <glm/glm.hpp>
 
 namespace Coel {
-    template <typename T> struct Uniform final { int location{}, count{1}; };
+    template <typename T>
+    struct Uniform final { int location{}, count{1}; };
     struct Shader {
         unsigned int id{};
     };

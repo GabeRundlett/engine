@@ -50,7 +50,8 @@ namespace Coel { namespace Renderer {
         for (const auto &o : model.objects) {
             uint32_t slot = 0;
             for (const auto &tex : o.textures) {
-                if (slot > 31) break;
+                if (slot > 31)
+                    break;
                 bind(tex, slot);
                 ++slot;
             }

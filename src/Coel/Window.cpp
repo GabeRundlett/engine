@@ -21,13 +21,20 @@ namespace Coel {
         ++s_windowCount;
 
         static constexpr auto dwc = [](Window &) {};
-        if (window.onResize == nullptr) window.onResize = dwc;
-        if (window.onFboResize == nullptr) window.onFboResize = dwc;
-        if (window.onMouseButton == nullptr) window.onMouseButton = dwc;
-        if (window.onMouseMove == nullptr) window.onMouseMove = dwc;
-        if (window.onMouseScroll == nullptr) window.onMouseScroll = dwc;
-        if (window.onKey == nullptr) window.onKey = dwc;
-        if (window.onChar == nullptr) window.onChar = dwc;
+        if (window.onResize == nullptr)
+            window.onResize = dwc;
+        if (window.onFboResize == nullptr)
+            window.onFboResize = dwc;
+        if (window.onMouseButton == nullptr)
+            window.onMouseButton = dwc;
+        if (window.onMouseMove == nullptr)
+            window.onMouseMove = dwc;
+        if (window.onMouseScroll == nullptr)
+            window.onMouseScroll = dwc;
+        if (window.onKey == nullptr)
+            window.onKey = dwc;
+        if (window.onChar == nullptr)
+            window.onChar = dwc;
 
         window.glfwHandle = glfwCreateWindow(window.size.x, window.size.y, window.title, nullptr, nullptr);
         if (!window.glfwHandle) {
@@ -99,7 +106,8 @@ namespace Coel {
     void destroy(Window &window) {
         glfwDestroyWindow(window.glfwHandle);
         --s_windowCount;
-        if (!s_windowCount) glfwTerminate();
+        if (!s_windowCount)
+            glfwTerminate();
     }
 
     void update(Window &window) {
@@ -134,7 +142,7 @@ namespace Coel {
         window.onFboResize(window);
     }
 
-    void bind(const Window& window) {
+    void bind(const Window &window) {
         glfwMakeContextCurrent(window.glfwHandle); //
     }
 } // namespace Coel

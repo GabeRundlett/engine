@@ -22,7 +22,7 @@ add_library(Coelengine
 	Coel/Renderers/ImGui/imgui_impl_opengl3.cpp 
 )
 
-target_link_libraries(Coelengine PUBLIC glfw glad imgui stb glm assimp)
+target_link_libraries(Coelengine PUBLIC glfw glad imgui stb glm)
 target_compile_features(Coelengine PUBLIC cxx_std_17)
 target_include_directories(Coelengine PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_compile_options(Coelengine PRIVATE

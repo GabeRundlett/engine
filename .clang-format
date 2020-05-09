@@ -1,8 +1,13 @@
 Language: Cpp
 BasedOnStyle: LLVM
 
+UseTab: Never
+TabWidth: 4
 IndentWidth: 4
-ColumnLimit: 128
+AccessModifierOffset: -2
+IndentCaseLabels: false
+ColumnLimit: 0
+BreakBeforeBraces: Attach
 
 SortIncludes: false
 SortUsingDeclarations: false
@@ -10,6 +15,6 @@ SortUsingDeclarations: false
 NamespaceIndentation: All
 CompactNamespaces: true
 
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
-AllowShortBlocksOnASingleLine: true
+AllowShortBlocksOnASingleLine: false
