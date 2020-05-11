@@ -1,10 +1,9 @@
 #include "ImGuiRenderer.hpp"
 
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
 
 namespace Coel { namespace Renderer {
     void setStyle() {
@@ -14,6 +13,7 @@ namespace Coel { namespace Renderer {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoMono-Regular.ttf", 24.0f, NULL, io.Fonts->GetGlyphRangesDefault());
 
         auto &style = ImGui::GetStyle();
         auto colors = style.Colors;

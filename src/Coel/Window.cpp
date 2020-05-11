@@ -36,6 +36,7 @@ namespace Coel {
         if (window.onChar == nullptr)
             window.onChar = dwc;
 
+        glfwWindowHint(GLFW_SAMPLES, 4);
         window.glfwHandle = glfwCreateWindow(window.size.x, window.size.y, window.title, nullptr, nullptr);
         if (!window.glfwHandle) {
             std::cerr << "Failed to create window\n";
@@ -51,13 +52,18 @@ namespace Coel {
 
         glfwSetWindowUserPointer(window.glfwHandle, &window);
         glfwSetInputMode(window.glfwHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        // glfwSwapInterval(1);
 
         glfwSetWindowSizeCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int w, int h) {
             Renderer::resizeViewport(0, 0, w, h);
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
             window->size = {w, h};
             window->onResize(*window);
+        });
+        glfwSetWindowPosCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int x, int y) {
+            Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+            window->pos = {x, y};
+            // window->onResize(*window);
         });
         glfwSetFramebufferSizeCallback(window.glfwHandle, [](GLFWwindow *glfwWindow, int w, int h) {
             Window *window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));

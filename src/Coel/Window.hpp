@@ -15,7 +15,7 @@ namespace Coel {
     };
 
     struct Window final {
-        glm::ivec2 size{800, 600};
+        glm::ivec2 pos{0, 0}, size{800, 600};
         const char *const title{"Coel Window"};
         Fbo fbo{0, size};
         KeyInfo key{};

@@ -13,11 +13,10 @@ add_library(Coelengine
 	
 	Coel/Renderers/Quad2d.cpp 
 	Coel/Renderers/Sprite.cpp 
-	Coel/Renderers/Batch2d.cpp 
 	Coel/Renderers/Batch3d.cpp 
-	# Coel/Renderers/BatchText.cpp
 
 	Coel/Renderers/ImGui/ImGuiRenderer.cpp 
+	Coel/Renderers/ImGui/ImGuiTextEditor.cpp 
 	Coel/Renderers/ImGui/imgui_impl_glfw.cpp 
 	Coel/Renderers/ImGui/imgui_impl_opengl3.cpp 
 )
@@ -27,5 +26,5 @@ target_compile_features(Coelengine PUBLIC cxx_std_17)
 target_include_directories(Coelengine PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_compile_options(Coelengine PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
