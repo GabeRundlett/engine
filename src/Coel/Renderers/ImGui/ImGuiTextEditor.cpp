@@ -9,9 +9,6 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h" // for imGui::GetCurrentWindow()
 
-// TODO
-// - multiline comments vs single-line: latter is blocking start of a ML
-
 template <class InputIt1, class InputIt2, class BinaryPredicate>
 bool equals(InputIt1 first1, InputIt1 last1,
             InputIt2 first2, InputIt2 last2, BinaryPredicate p) {

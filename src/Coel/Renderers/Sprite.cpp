@@ -29,7 +29,7 @@ void main() {
 })";
 
 namespace Coel {
-    constexpr unsigned int MAX_SPRITE_COUNT = 100000, MAX_VCOUNT = MAX_SPRITE_COUNT * 4, MAX_ICOUNT = MAX_SPRITE_COUNT * 6;
+    constexpr unsigned int MAX_SPRITE_COUNT = 100000, MAX_ICOUNT = MAX_SPRITE_COUNT * 6;
     constexpr unsigned int MAX_VSIZE = MAX_SPRITE_COUNT * 4 * sizeof(SpriteRenderer::Vertex),
                            MAX_ISIZE = MAX_SPRITE_COUNT * 6 * sizeof(unsigned int);
 

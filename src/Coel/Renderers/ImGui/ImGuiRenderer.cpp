@@ -12,7 +12,7 @@ namespace Coel { namespace Renderer {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoMono-Regular.ttf", 24.0f, NULL, io.Fonts->GetGlyphRangesDefault());
 
         auto &style = ImGui::GetStyle();
